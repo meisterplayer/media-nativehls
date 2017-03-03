@@ -1,0 +1,21 @@
+{
+  "name": "@npm-wearetriple/meister-plugin-nativehls",
+  "version": "1.0.0",
+  "description": "Meister plugin for playback of HLS in browsers that support it natively (ex. Safari)",
+  "main": "dist/NativeHls.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "meister",
+    "video",
+    "plugin",
+    "hls"
+  ],
+  "author": "Triple",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@npm-wearetriple/js-dev": "^2.3.3",
+    "gulp": "^3.9.1"
+  }
+}
