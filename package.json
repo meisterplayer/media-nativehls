@@ -14,10 +14,9 @@
   ],
   "author": "Triple",
   "license": "Apache-2.0",
-  "dependencies": {
-    "@npm-wearetriple/js-dev": "^2.3.3"
-  },
+  "dependencies": {},
   "devDependencies": {
+    "@npm-wearetriple/js-dev": "^2.3.3",
     "gulp": "^3.9.1"
   }
 }
