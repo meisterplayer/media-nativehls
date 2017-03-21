@@ -18,10 +18,10 @@ var meisterPlayer = new Meister("#player", {
 
 Options are required unless marked as [optional].
 
-* [optional] [**filterAudioOnly**](#filterAudioOnly)
-* [optional] [**dvrEnabled**](#dvrEnabled)
-* [optional] [**dvrThreshold**](#dvrThreshold)
-* [optional] [**safariDesktopDisabled**](#safariDesktopDisabled)
+* [optional] [**filterAudioOnly**](#filteraudioonly-boolean-default-false)
+* [optional] [**dvrEnabled**](#dvrenabled-boolean-default-true)
+* [optional] [**dvrThreshold**](#dvrthreshold-number-default-300)
+* [optional] [**safariDesktopDisabled**](#safaridesktopdisabled-boolean-default-false)
 
 Config options
 -------
