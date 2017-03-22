@@ -12,6 +12,11 @@ var meisterPlayer = new Meister("#player", {
         filterAudioOnly: true,
     },
 });
+
+meisterPlayer.setItem({
+    src: 'INSERT_HLS_M3U8_HERE',
+    type: 'm3u8',
+});
 ```
 
 ### Configuration ###
