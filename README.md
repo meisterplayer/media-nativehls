@@ -1,6 +1,6 @@
 # Native HLS Plugin #
 
-A wrapper for browsers that supports natively HLS.
+A wrapper for browsers that supports natively HLS that adds additional control and configuration over default native playback.
 
 ### How do I get set up? ###
 
@@ -47,7 +47,7 @@ var meisterPlayer = new Meister('#player', {
 
 #### dvrEnabled *[Boolean]* (default: true) ####
 
-This enables/disables DVR capabilities in HLS if it is supported by the stream.
+Setting this flag to true will treat a HLS stream with DVR window as a livestream.
 
 Example:
 
@@ -61,7 +61,7 @@ var meisterPlayer = new Meister('#player', {
 
 #### dvrThreshold *[Number]* (default: 300) ####
 
-This value determines if a live stream is a DVR stream yes or no. If the live stream has added up more seconds then the dvrThreshold it is considered a DVR stream else not.
+This value in seconds is used to determine whether a HLS stream is considered to have a DVR window or not. By default streams that have a window of less than 5 minutes are considered 'just' live.
 
 Example:
 
@@ -75,7 +75,7 @@ var meisterPlayer = new Meister('#player', {
 
 #### safariDesktopDisabled *[Boolean]* (default: false) ####
 
-This disables native HLS playback on safari browsers. This can be done for example when you have another plugin that allows HLS playback but with more features. This config option is only affected on the current instance.
+This flag can be used to disable the plugin in Safari on macOS. This can be useful when you do want to use it for mobile playback, but have a more feature rich HLS plugin for macOS.
 
 Example:
 
