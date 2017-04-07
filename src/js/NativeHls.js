@@ -60,14 +60,22 @@ class NativeHls extends Meister.MediaPlugin {
                     errorCode: Meister.ErrorCodes.WRONG_TYPE,
                 });
             }
-            // Exception for safari.
+
+            // Non Safari browsers are not supported.
             if ((!this.meister.browser.isSafari)
+                // When safariDesktopDisabled is true and it's not iOS disable it.
                 || (!this.meister.browser.isiOS && this.config.safariDesktopDisabled)
             ) {
-                return resolve({
-                    supported: false,
-                    errorCode: Meister.ErrorCodes.NOT_SUPPORTED,
-                });
+                // Make sure we are not in Facebook mode. Where the User agent is modified.
+                // This means we are Safari on iOS but no indication of it in the user agent.
+                // Allow these browsers to pass.
+                if (!this.meister.browser.isFacebook && !this.meister.browser.isiOS) {
+                    return resolve({
+                        supported: false,
+                        errorCode: Meister.ErrorCodes.NOT_SUPPORTED,
+                    });
+                }
+
             }
 
             if (item.drm || item.drmConfig) {
