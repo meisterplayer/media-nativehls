@@ -1,121 +1,694 @@
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
-  return typeof obj;
-} : function (obj) {
-  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-};
+module.exports =
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// identity function for calling harmony imports with the correct context
+/******/ 	__webpack_require__.i = function(value) { return value; };
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, {
+/******/ 				configurable: false,
+/******/ 				enumerable: true,
+/******/ 				get: getter
+/******/ 			});
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "/";
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = 4);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
 
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _NativeHls = __webpack_require__(1);
+
+var _NativeHls2 = _interopRequireDefault(_NativeHls);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = _NativeHls2.default;
+
+/***/ }),
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
 
 
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
+var _Http = __webpack_require__(2);
 
+var _Http2 = _interopRequireDefault(_Http);
 
+var _M3u8Parser = __webpack_require__(3);
 
+var _M3u8Parser2 = _interopRequireDefault(_M3u8Parser);
 
-var classCallCheck = function (instance, Constructor) {
-  if (!(instance instanceof Constructor)) {
-    throw new TypeError("Cannot call a class as a function");
-  }
-};
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var createClass = function () {
-  function defineProperties(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var POLL_INTERVAL = 1000;
+
+var NativeHls = function (_Meister$MediaPlugin) {
+    _inherits(NativeHls, _Meister$MediaPlugin);
+
+    function NativeHls(config, meister, next) {
+        _classCallCheck(this, NativeHls);
+
+        var _this = _possibleConstructorReturn(this, (NativeHls.__proto__ || Object.getPrototypeOf(NativeHls)).call(this, config, meister));
+
+        _this.manifestParsed = false;
+
+        _this.audioMode = false;
+
+        _this.metadata = [];
+        _this.previousMetadata = null;
+
+        // Middleware promise chain.
+        _this.next = next;
+
+        // -1 for automatic quality selection
+        _this.previousLevel = -1;
+        _this.lowestLevel = 0;
+
+        _this.dvrThreshold = _this.config.dvrThreshold || 300;
+
+        // new
+        _this.duration = 0;
+        _this.endTime = 0;
+        _this.beginTime = 0;
+        _this.mediaSequence = 0;
+        _this.lastMediaSequence = 0;
+        _this.childManifest = null;
+        _this.qualityStreams = [];
+        _this.masterPlaylist = null;
+
+        _this.baseEndTime = 0;
+
+        _this.manifestTimeoutId = null;
+
+        // Keep track of the current playback quality.
+        _this.pollResolutionId = null;
+        _this.currentResolution = {
+            width: 0,
+            height: 0
+        };
+
+        _this.name = 'nativeHLS';
+        _this.events = [];
+        return _this;
     }
-  }
 
-  return function (Constructor, protoProps, staticProps) {
-    if (protoProps) defineProperties(Constructor.prototype, protoProps);
-    if (staticProps) defineProperties(Constructor, staticProps);
-    return Constructor;
-  };
-}();
+    _createClass(NativeHls, [{
+        key: 'isItemSupported',
+        value: function isItemSupported(item) {
+            var _this2 = this;
+
+            return new Promise(function (resolve) {
+                if (item.type !== 'm3u8' && item.type !== 'm3u') {
+                    return resolve({
+                        supported: false,
+                        errorCode: Meister.ErrorCodes.WRONG_TYPE
+                    });
+                }
+
+                // Non Safari browsers are not supported.
+                if (!_this2.meister.browser.isSafari ||
+                // When safariDesktopDisabled is true and it's not iOS disable it.
+                !_this2.meister.browser.isiOS && _this2.config.safariDesktopDisabled) {
+                    // Make sure we are not in Facebook mode. Where the User agent is modified.
+                    // This means we are Safari on iOS but no indication of it in the user agent.
+                    // Allow these browsers to pass.
+                    if (!_this2.meister.browser.isFacebook && !_this2.meister.browser.isiOS) {
+                        return resolve({
+                            supported: false,
+                            errorCode: Meister.ErrorCodes.NOT_SUPPORTED
+                        });
+                    }
+                }
+
+                if (item.drm || item.drmConfig) {
+                    _this2.meister.one('drmKeySystemSupport', function (supportedDRMSystems) {
+                        var supported = false;
+                        Object.keys(supportedDRMSystems).forEach(function (key) {
+                            if (key === 'com.apple.fps' && supportedDRMSystems[key] || key === 'com.apple.fps.1_0' && supportedDRMSystems[key] || key === 'com.apple.fps.2_0' && supportedDRMSystems[key]) {
+                                supported = true;
+                            }
+                        });
+                        return resolve({
+                            supported: supported,
+                            errorCode: supported ? null : Meister.ErrorCodes.NO_DRM
+                        });
+                    });
+
+                    _this2.meister.trigger('requestDrmKeySystemSupport', {});
+                } else {
+                    return resolve({
+                        supported: true
+                    });
+                }
+            });
+        }
+    }, {
+        key: 'resetPrivates',
+        value: function resetPrivates() {
+            this.metadata = [];
+            this.previousMetadata = null;
+
+            this.manifestParsed = false;
+
+            this.previousLevel = -1;
+            this.lowestLevel = 0;
+            this.duration = 0;
+            this.item = null;
+        }
+    }, {
+        key: 'process',
+        value: function process(item) {
+            var _this3 = this;
+
+            return this.next(item).then(function (newItem) {
+                _this3.player = _this3.meister.getPlayerByType('html5', newItem);
+                if (_this3.meister.config.audioOnly || newItem.mediaType === 'audio') {
+                    _this3.audioMode = true;
+                } else {
+                    _this3.audioMode = false;
+                }
+
+                return newItem;
+            }).catch(function (err) {
+                console.error('Something went wrong while processing middlewares. ' + err);
+            });
+        }
+    }, {
+        key: 'load',
+        value: function load(item) {
+            var _this4 = this;
+
+            _get(NativeHls.prototype.__proto__ || Object.getPrototypeOf(NativeHls.prototype), 'load', this).call(this, item);
+            this.item = item;
+
+            return new Promise(function (resolve) {
+                _this4.mediaElement = _this4.player.mediaElement;
+                _this4.mediaElement.src = item.src;
+                _this4.masterPlaylist = item.src;
+
+                // Display the correct title.
+                _this4.on('_playerTimeUpdate', _this4._onPlayerTimeUpdate.bind(_this4));
+                _this4.on('_playerSeek', _this4._onPlayerSeek.bind(_this4));
+                _this4.on('requestSeek', _this4.onRequestSeek.bind(_this4));
+
+                // Listen to control events.
+                _this4.on('requestBitrate', _this4.onRequestBitrate.bind(_this4));
+                _this4.on('requestGoLive', function () {
+                    return _this4.onRequestGoLive();
+                });
+
+                _this4.pollResolutionId = setInterval(_this4.pollResolution.bind(_this4), POLL_INTERVAL);
+
+                // Trigger this to make it look pretty.
+                // Loading the first playlist.
+                _this4.loadManifest(item.src).then(function (manifest) {
+                    _this4.endTime = manifest.duration;
+                    _this4.baseEndTime = _this4.endTime;
+                    _this4.duration = manifest.duration;
+                    _this4.mediaSequence = manifest.mediaSequence;
+
+                    _this4.beginTime = _this4.endTime - _this4.duration;
+
+                    // Kinda weird, but let's roll with it for now..
+                    var lastMediaSequence = Object.keys(manifest.segments)[Object.keys(manifest.segments).length - 1];
+                    _this4.lastMediaSequence = lastMediaSequence;
+
+                    var hasDVR = manifest.duration > _this4.dvrThreshold && manifest.isLive;
+
+                    if (_this4.config.dvrEnabled === false) {
+                        hasDVR = false;
+                    }
+
+                    _this4.meister.trigger('itemTimeInfo', {
+                        isLive: manifest.isLive,
+                        hasDVR: hasDVR,
+                        duration: _this4.duration,
+                        modifiedDuration: _this4.duration,
+                        endTime: _this4.endTime
+                    });
+
+                    // this.onMasterPlaylistLoaded(manifest);
+                    if (manifest.isLive) _this4.onRequestGoLive();
+
+                    _this4.manifestTimeoutId = setTimeout(function () {
+                        _this4.getNewManifest();
+                    }, 5000); // Amount of seconds should be dynamic (By using the manifest)
+                });
+
+                resolve();
+            });
+        }
+    }, {
+        key: '_onPlayerTimeUpdate',
+        value: function _onPlayerTimeUpdate() {
+            var playOffset = this.endTime - this.duration;
+
+            this.meister.trigger('playerTimeUpdate', {
+                currentTime: this.meister.currentTime - playOffset,
+                duration: this.duration
+            });
+
+            this.broadcastTitle();
+        }
+    }, {
+        key: '_onPlayerSeek',
+        value: function _onPlayerSeek() {
+            var playOffset = this.endTime - this.duration;
+
+            var currentTime = this.meister.currentTime - playOffset;
+            var duration = this.duration;
+            var relativePosition = currentTime / duration;
+
+            this.meister.trigger('playerSeek', {
+                relativePosition: relativePosition,
+                currentTime: currentTime,
+                duration: duration
+            });
+        }
+    }, {
+        key: 'onRequestSeek',
+        value: function onRequestSeek(e) {
+            var targetTime = void 0;
+
+            if (Number.isFinite(e.relativePosition)) {
+                var playOffset = this.endTime - this.duration;
+                targetTime = this.duration * e.relativePosition + playOffset;
+            } else if (Number.isFinite(e.timeOffset)) {
+                targetTime = this.meister.currentTime + e.timeOffset;
+            } else if (Number.isFinite(e.targetTime)) {
+                var _playOffset = this.endTime - this.duration;
+                targetTime = e.targetTime + _playOffset;
+            }
+
+            // Check whether we are allowed to seek forward.
+            if (!e.forcedStart && this.blockSeekForward && targetTime > this.meister.currentTime) {
+                return;
+            }
+
+            if (Number.isFinite(targetTime)) {
+                this.meister.currentTime = targetTime;
+            }
+        }
+    }, {
+        key: 'onRequestGoLive',
+        value: function onRequestGoLive() {
+            var _this5 = this;
+
+            if (isNaN(this.meister.duration)) {
+                this.meister.one('playerLoadedMetadata', function () {
+                    _this5.onRequestGoLive();
+                });
+            } else {
+                this.meister.currentTime = this.endTime - 30;
+            }
+        }
+    }, {
+        key: 'broadcastTitle',
+        value: function broadcastTitle() {
+            var time = this.meister.currentTime;
+            // No need to spam events.
+            if (this.previousMetadata && this.previousMetadata.start < time && time < this.previousMetadata.end) {
+                return;
+            }
+
+            // Still playing the same item.
+            var currentMetadata = this.currentlyPlaying;
+            if (this.previousMetadata && currentMetadata.title === this.previousMetadata.title) {
+                return;
+            }
+
+            // Remember the current metadata for the next call.
+            this.previousMetadata = currentMetadata;
+
+            // Broadcast event for the ui.
+            this.meister.trigger('itemMetadata', {
+                title: currentMetadata.title
+            });
+        }
+    }, {
+        key: 'onRequestBitrate',
+        value: function onRequestBitrate(e) {
+            var _this6 = this;
+
+            var previousCurrentTime = this.meister.currentTime;
+            var wasPlaying = this.meister.playing;
+
+            // Since we're setting a new source we could need updated drm settings.
+            if (e.drmConfig) {
+                this.meister.trigger('drmConfig', e.drmConfig);
+            }
+
+            this.meister.playerPlugin.mediaElement.src = '';
+            if (e.bitrateIndex === -1) {
+                this.meister.playerPlugin.mediaElement.src = this.masterPlaylist;
+            } else {
+                this.meister.playerPlugin.mediaElement.src = this.meister.utils.resolveUrl(this.masterPlaylist, this.qualityStreams[e.bitrateIndex].url);
+            }
+
+            // Reset playoffset and endtime, since we cleared the source.
+            this.playOffset = 0;
+            this.endTime = this.baseEndTime;
+
+            this.meister.one('playerLoadedMetadata', function () {
+                _this6.meister.currentTime = previousCurrentTime;
+
+                if (wasPlaying) {
+                    _this6.meister.play();
+                } else {
+                    _this6.meister.pause();
+                }
+            });
+        }
+    }, {
+        key: 'onError',
+        value: function onError(e, data) {
+            console.warn('Error in ' + this.name + ', type: ' + data.details + ', will attempt to recover.');
+            if (data.fatal) {
+                console.error('Can not recover from ' + data.type + ': ' + data.details + '.');
+            }
+        }
+
+        // copypaste from native-hls
+
+    }, {
+        key: 'pollResolution',
+        value: function pollResolution() {
+            var height = this.mediaElement.videoHeight;
+            var width = this.mediaElement.videoWidth;
+
+            if (this.currentResolution.width === width && this.currentResolution.height === height) return;
+
+            var newBitrate = this.qualityStreams.find(function (stream) {
+                return stream.resolution && stream.resolution.width === width && stream.resolution.height === height;
+            });
+
+            // This can happen while switching streams, no need to notify the player.
+            if (!newBitrate) return;
+
+            var newBitrateIndex = this.qualityStreams.indexOf(newBitrate);
+
+            this.meister.trigger('playerAutoSwitchBitrate', {
+                newBitrate: parseInt(newBitrate.bandwith, 10),
+                newBitrateIndex: newBitrateIndex
+            });
+
+            this.currentResolution = newBitrate.resolution;
+        }
+    }, {
+        key: 'getNewManifest',
 
 
+        // copypaste from native-hls
+        value: function getNewManifest() {
+            var _this7 = this;
+
+            this.loadManifest(this.childManifest).then(function (manifest) {
+                var lastMediaSequence = Object.keys(manifest.segments)[Object.keys(manifest.segments).length - 1];
+                var amountOfNewSegments = lastMediaSequence - _this7.lastMediaSequence;
+
+                for (var i = 0; i < amountOfNewSegments; i++) {
+                    _this7.endTime += manifest.segments[Object.keys(manifest.segments)[i]];
+                }
+
+                // Just for testing purposes:
+                _this7.duration = manifest.duration;
+                _this7.beginTime = _this7.endTime - manifest.duration;
+                _this7.lastMediaSequence = lastMediaSequence;
+
+                var hasDVR = manifest.duration > _this7.dvrThreshold && manifest.isLive;
+
+                if (_this7.config.dvrEnabled === false) {
+                    hasDVR = false;
+                }
+
+                _this7.meister.trigger('itemTimeInfo', {
+                    isLive: manifest.isLive,
+                    hasDVR: hasDVR,
+                    duration: _this7.duration,
+                    modifiedDuration: _this7.duration,
+                    endTime: _this7.endTime
+                });
+
+                _this7.manifestTimeoutId = setTimeout(function () {
+                    _this7.getNewManifest();
+                }, 5000);
+            }, function () {
+                console.warn('WARNING: Could not load manifest, retrying loading manifest.');
+                _this7.manifestTimeoutId = setTimeout(function () {
+                    _this7.getNewManifest();
+                }, 5000);
+            });
+        }
+
+        // copypaste from native-hls
+
+    }, {
+        key: 'loadManifest',
+        value: function loadManifest(src) {
+            var _this8 = this;
+
+            return new Promise(function (resolve) {
+                _Http2.default.get(src, function (res) {
+                    var m3u8 = new _M3u8Parser2.default(res.responseText);
+                    var manifest = m3u8.parse();
+
+                    if (manifest.streams.length) {
+                        if (_this8.config.filterAudioOnly) {
+                            _this8.qualityStreams = manifest.streams.filter(function (stream) {
+                                return stream.resolution;
+                            });
+                        } else {
+                            _this8.qualityStreams = manifest.streams;
+                        }
+
+                        _this8.onQualitysAvailable();
+
+                        _this8.childManifest = _this8.meister.utils.resolveUrl(src, manifest.streams[0].url);
+                        // This is the master playlist we need to parse the sub playlist.
+                        _this8.loadManifest(_this8.meister.utils.resolveUrl(src, manifest.streams[0].url)).then(function (childManifest) {
+                            resolve(childManifest);
+                        });
+                    } else {
+                        resolve(manifest);
+                    }
+                });
+            });
+        }
+
+        // copypaste from native-hls
+
+    }, {
+        key: 'onQualitysAvailable',
+        value: function onQualitysAvailable() {
+            var bitrates = [];
+
+            // Bitrate 0 means auto quality.
+            bitrates.push({
+                bitrate: 0,
+                index: -1
+            });
+
+            for (var i = 0; i < this.qualityStreams.length; i++) {
+                var bitrate = this.qualityStreams[i];
+                bitrates.push({
+                    bitrate: parseInt(bitrate.bandwith, 10),
+                    index: i
+                });
+            }
+
+            // Trigger auto bitrate by default.
+            this.meister.trigger('itemBitrates', {
+                bitrates: bitrates,
+                currentIndex: -1
+            });
+        }
+    }, {
+        key: 'unload',
+        value: function unload() {
+            _get(NativeHls.prototype.__proto__ || Object.getPrototypeOf(NativeHls.prototype), 'unload', this).call(this);
+            if (this.manifestTimeoutId) clearTimeout(this.manifestTimeoutId);
+            if (this.pollResolutionId) clearInterval(this.pollResolutionId);
+
+            this.meister.remove(this.events);
+
+            this.duration = 0;
+            this.endTime = 0;
+            this.baseEndTime = 0;
+            this.beginTime = 0;
+            this.mediaSequence = 0;
+            this.lastMediaSequence = 0;
+            this.childManifest = null;
+            this.qualityStreams = [];
+            this.masterPlaylist = null;
+            this.manifestTimeoutId = null;
+            this.pollResolutionId = null;
+            this.currentResolution = {
+                width: 0,
+                height: 0
+            };
+            this.mediaElement = null;
+        }
+    }, {
+        key: 'destroy',
+        value: function destroy() {
+            _get(NativeHls.prototype.__proto__ || Object.getPrototypeOf(NativeHls.prototype), 'destroy', this).call(this);
+        }
+    }, {
+        key: 'currentItem',
+        get: function get() {
+            var metadata = this.currentlyPlaying;
+
+            var currentItem = {
+                src: this.item.src,
+                type: this.item.type,
+                title: metadata.title,
+                bitrate: metadata.bitrate
+            };
+
+            return currentItem;
+        }
+    }, {
+        key: 'currentlyPlaying',
+        get: function get() {
+            // Prepare return object.
+            var metadata = {
+                bitrate: 0,
+                title: ''
+            };
+
+            // Traverse backwards since it is more likely that the player is near the end
+            var data = null;
+            var time = this.meister.currentTime;
+            for (var i = this.metadata.length - 1; i >= 0; i--) {
+                if (this.metadata[i].start < time && time < this.metadata[i].end) {
+                    data = this.metadata[i];
+                    break;
+                }
+            }
+
+            if (data) {
+                metadata.title = data.title;
+                metadata.start = data.start;
+                metadata.end = data.end;
+                metadata.duration = data.end - data.start;
+            }
+
+            return metadata;
+        }
+    }], [{
+        key: 'pluginName',
+        get: function get() {
+            return 'NativeHls';
+        }
+    }]);
+
+    return NativeHls;
+}(Meister.MediaPlugin);
+
+Meister.registerPlugin(NativeHls.pluginName, NativeHls);
+Meister.registerPlugin('nativehls', NativeHls);
+
+exports.default = NativeHls;
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
 
 
-
-
-
-var get = function get(object, property, receiver) {
-  if (object === null) object = Function.prototype;
-  var desc = Object.getOwnPropertyDescriptor(object, property);
-
-  if (desc === undefined) {
-    var parent = Object.getPrototypeOf(object);
-
-    if (parent === null) {
-      return undefined;
-    } else {
-      return get(parent, property, receiver);
-    }
-  } else if ("value" in desc) {
-    return desc.value;
-  } else {
-    var getter = desc.get;
-
-    if (getter === undefined) {
-      return undefined;
-    }
-
-    return getter.call(receiver);
-  }
-};
-
-var inherits = function (subClass, superClass) {
-  if (typeof superClass !== "function" && superClass !== null) {
-    throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
-  }
-
-  subClass.prototype = Object.create(superClass && superClass.prototype, {
-    constructor: {
-      value: subClass,
-      enumerable: false,
-      writable: true,
-      configurable: true
-    }
-  });
-  if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
-};
-
-
-
-
-
-
-
-
-
-
-
-var possibleConstructorReturn = function (self, call) {
-  if (!self) {
-    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-  }
-
-  return call && (typeof call === "object" || typeof call === "function") ? call : self;
-};
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 /**
  * @class httpModule
  * @type {{getPageByURL, handleResponse, parseCookie, queryStringToJsonObject, jsonObjectToQuerystring}}
  */
 
-var _totalMillisecondsDelta = 0;
-var _noop = function _noop() {};
-var _activeXHRs = [];
-var _totalBytesDelta = 0;
-var _maximumHistorySize = 7;
-var _totalBytesDeltaHistory = [];
-var _totalMillisecondsDeltaHistory = [];
-var _isObjLiteral = function _isObjLiteral(_obj) {
+var _totalMillisecondsDelta = 0,
+    _noop = function _noop() {},
+    _activeXHRs = [],
+    _totalBytesDelta = 0,
+    _maximumHistorySize = 7,
+    _totalBytesDeltaHistory = [],
+    _totalMillisecondsDeltaHistory = [],
+    _isObjLiteral = function _isObjLiteral(_obj) {
     var _test = _obj;
     return (typeof _obj === 'undefined' ? 'undefined' : _typeof(_obj)) !== 'object' || _obj === null ? false : function () {
         while (!false) {
@@ -125,8 +698,8 @@ var _isObjLiteral = function _isObjLiteral(_obj) {
         }
         return Object.getPrototypeOf(_obj) === _test;
     }();
-};
-var _verifiedOptions = function _verifiedOptions(options) {
+},
+    _verifiedOptions = function _verifiedOptions(options) {
     if (!_isObjLiteral(options)) {
         console.error('Cannot construct http request, the options parameter is not an object literal.', options);
         return false;
@@ -143,8 +716,8 @@ var _verifiedOptions = function _verifiedOptions(options) {
     }
 
     return true;
-};
-var _objectToQueryString = function _objectToQueryString(obj) {
+},
+    _objectToQueryString = function _objectToQueryString(obj) {
     var parts = [];
     for (var key in obj) {
         if (obj.hasOwnProperty(key)) {
@@ -152,8 +725,8 @@ var _objectToQueryString = function _objectToQueryString(obj) {
         }
     }
     return parts.join('&');
-};
-var _updateProgress = function _updateProgress(event) {
+},
+    _updateProgress = function _updateProgress(event) {
     // Make sure to reset the bytes downloaded (can happen after an abort).
     if (event.loaded < this.bytesDownloaded) {
         this.bytesDownloaded = 0;
@@ -458,16 +1031,31 @@ Http.prototype.progress = function (callback) {
     return this;
 };
 
-var Http_1 = Http;
+module.exports = Http;
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var M3u8Parser = function () {
     function M3u8Parser(text) {
-        classCallCheck(this, M3u8Parser);
+        _classCallCheck(this, M3u8Parser);
 
         this.text = text;
     }
 
-    createClass(M3u8Parser, [{
+    _createClass(M3u8Parser, [{
         key: 'parse',
         value: function parse() {
             var lines = this.text.split('\n');
@@ -541,546 +1129,19 @@ var M3u8Parser = function () {
             return result;
         }
     }]);
+
     return M3u8Parser;
 }();
 
-var POLL_INTERVAL = 1000;
+exports.default = M3u8Parser;
 
-var NativeHls$1 = function (_Meister$MediaPlugin) {
-    inherits(NativeHls, _Meister$MediaPlugin);
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
 
-    function NativeHls(config, meister, next) {
-        classCallCheck(this, NativeHls);
+module.exports = __webpack_require__(0);
 
-        var _this = possibleConstructorReturn(this, (NativeHls.__proto__ || Object.getPrototypeOf(NativeHls)).call(this, config, meister));
 
-        _this.manifestParsed = false;
-
-        _this.audioMode = false;
-
-        _this.metadata = [];
-        _this.previousMetadata = null;
-
-        // Middleware promise chain.
-        _this.next = next;
-
-        // -1 for automatic quality selection
-        _this.previousLevel = -1;
-        _this.lowestLevel = 0;
-
-        _this.dvrThreshold = _this.config.dvrThreshold || 300;
-
-        // new
-        _this.duration = 0;
-        _this.endTime = 0;
-        _this.beginTime = 0;
-        _this.mediaSequence = 0;
-        _this.lastMediaSequence = 0;
-        _this.childManifest = null;
-        _this.qualityStreams = [];
-        _this.masterPlaylist = null;
-
-        _this.baseEndTime = 0;
-
-        _this.manifestTimeoutId = null;
-
-        // Keep track of the current playback quality.
-        _this.pollResolutionId = null;
-        _this.currentResolution = {
-            width: 0,
-            height: 0
-        };
-
-        _this.name = 'nativeHLS';
-        _this.events = [];
-        return _this;
-    }
-
-    createClass(NativeHls, [{
-        key: 'isItemSupported',
-        value: function isItemSupported(item) {
-            var _this2 = this;
-
-            return new Promise(function (resolve) {
-                if (item.type !== 'm3u8' && item.type !== 'm3u') {
-                    return resolve({
-                        supported: false,
-                        errorCode: Meister.ErrorCodes.WRONG_TYPE
-                    });
-                }
-                // Exception for safari.
-                if (!_this2.meister.browser.isSafari || !_this2.meister.browser.isiOS && _this2.config.safariDesktopDisabled) {
-                    return resolve({
-                        supported: false,
-                        errorCode: Meister.ErrorCodes.NOT_SUPPORTED
-                    });
-                }
-
-                if (item.drm || item.drmConfig) {
-                    _this2.meister.one('drmKeySystemSupport', function (supportedDRMSystems) {
-                        var supported = false;
-                        Object.keys(supportedDRMSystems).forEach(function (key) {
-                            if (key === 'com.apple.fps' && supportedDRMSystems[key] || key === 'com.apple.fps.1_0' && supportedDRMSystems[key] || key === 'com.apple.fps.2_0' && supportedDRMSystems[key]) {
-                                supported = true;
-                            }
-                        });
-                        return resolve({
-                            supported: supported,
-                            errorCode: supported ? null : Meister.ErrorCodes.NO_DRM
-                        });
-                    });
-
-                    _this2.meister.trigger('requestDrmKeySystemSupport', {});
-                } else {
-                    return resolve({
-                        supported: true
-                    });
-                }
-            });
-        }
-    }, {
-        key: 'resetPrivates',
-        value: function resetPrivates() {
-            this.metadata = [];
-            this.previousMetadata = null;
-
-            this.manifestParsed = false;
-
-            this.previousLevel = -1;
-            this.lowestLevel = 0;
-            this.duration = 0;
-            this.item = null;
-        }
-    }, {
-        key: 'process',
-        value: function process(item) {
-            var _this3 = this;
-
-            return this.next(item).then(function (newItem) {
-                _this3.player = _this3.meister.getPlayerByType('html5', newItem);
-                if (_this3.meister.config.audioOnly || newItem.mediaType === 'audio') {
-                    _this3.audioMode = true;
-                } else {
-                    _this3.audioMode = false;
-                }
-
-                return newItem;
-            }).catch(function (err) {
-                console.error('Something went wrong while processing middlewares. ' + err);
-            });
-        }
-    }, {
-        key: 'load',
-        value: function load(item) {
-            var _this4 = this;
-
-            get(NativeHls.prototype.__proto__ || Object.getPrototypeOf(NativeHls.prototype), 'load', this).call(this, item);
-            this.item = item;
-
-            return new Promise(function (resolve) {
-                _this4.mediaElement = _this4.player.mediaElement;
-                _this4.mediaElement.src = item.src;
-                _this4.masterPlaylist = item.src;
-
-                // Display the correct title.
-                _this4.on('_playerTimeUpdate', _this4._onPlayerTimeUpdate.bind(_this4));
-                _this4.on('_playerSeek', _this4._onPlayerSeek.bind(_this4));
-                _this4.on('requestSeek', _this4.onRequestSeek.bind(_this4));
-
-                // Listen to control events.
-                _this4.on('requestBitrate', _this4.onRequestBitrate.bind(_this4));
-                _this4.on('requestGoLive', function () {
-                    return _this4.onRequestGoLive();
-                });
-
-                _this4.pollResolutionId = setInterval(_this4.pollResolution.bind(_this4), POLL_INTERVAL);
-
-                // Trigger this to make it look pretty.
-                // Loading the first playlist.
-                _this4.loadManifest(item.src).then(function (manifest) {
-                    _this4.endTime = manifest.duration;
-                    _this4.baseEndTime = _this4.endTime;
-                    _this4.duration = manifest.duration;
-                    _this4.mediaSequence = manifest.mediaSequence;
-
-                    _this4.beginTime = _this4.endTime - _this4.duration;
-
-                    // Kinda weird, but let's roll with it for now..
-                    var lastMediaSequence = Object.keys(manifest.segments)[Object.keys(manifest.segments).length - 1];
-                    _this4.lastMediaSequence = lastMediaSequence;
-
-                    var hasDVR = manifest.duration > _this4.dvrThreshold && manifest.isLive;
-
-                    if (_this4.config.dvrEnabled === false) {
-                        hasDVR = false;
-                    }
-
-                    _this4.meister.trigger('itemTimeInfo', {
-                        isLive: manifest.isLive,
-                        hasDVR: hasDVR,
-                        duration: _this4.duration,
-                        modifiedDuration: _this4.duration,
-                        endTime: _this4.endTime
-                    });
-
-                    // this.onMasterPlaylistLoaded(manifest);
-                    if (manifest.isLive) _this4.onRequestGoLive();
-
-                    _this4.manifestTimeoutId = setTimeout(function () {
-                        _this4.getNewManifest();
-                    }, 5000); // Amount of seconds should be dynamic (By using the manifest)
-                });
-
-                resolve();
-            });
-        }
-    }, {
-        key: '_onPlayerTimeUpdate',
-        value: function _onPlayerTimeUpdate() {
-            var playOffset = this.endTime - this.duration;
-
-            this.meister.trigger('playerTimeUpdate', {
-                currentTime: this.meister.currentTime - playOffset,
-                duration: this.duration
-            });
-
-            this.broadcastTitle();
-        }
-    }, {
-        key: '_onPlayerSeek',
-        value: function _onPlayerSeek() {
-            var playOffset = this.endTime - this.duration;
-
-            var currentTime = this.meister.currentTime - playOffset;
-            var duration = this.duration;
-            var relativePosition = currentTime / duration;
-
-            this.meister.trigger('playerSeek', {
-                relativePosition: relativePosition,
-                currentTime: currentTime,
-                duration: duration
-            });
-        }
-    }, {
-        key: 'onRequestSeek',
-        value: function onRequestSeek(e) {
-            var targetTime = void 0;
-
-            if (Number.isFinite(e.relativePosition)) {
-                var playOffset = this.endTime - this.duration;
-                targetTime = this.duration * e.relativePosition + playOffset;
-            } else if (Number.isFinite(e.timeOffset)) {
-                targetTime = this.meister.currentTime + e.timeOffset;
-            } else if (Number.isFinite(e.targetTime)) {
-                var _playOffset = this.endTime - this.duration;
-                targetTime = e.targetTime + _playOffset;
-            }
-
-            // Check whether we are allowed to seek forward.
-            if (!e.forcedStart && this.blockSeekForward && targetTime > this.meister.currentTime) {
-                return;
-            }
-
-            if (Number.isFinite(targetTime)) {
-                this.meister.currentTime = targetTime;
-            }
-        }
-    }, {
-        key: 'onRequestGoLive',
-        value: function onRequestGoLive() {
-            var _this5 = this;
-
-            if (isNaN(this.meister.duration)) {
-                this.meister.one('playerLoadedMetadata', function () {
-                    _this5.onRequestGoLive();
-                });
-            } else {
-                this.meister.currentTime = this.endTime - 30;
-            }
-        }
-    }, {
-        key: 'broadcastTitle',
-        value: function broadcastTitle() {
-            var time = this.meister.currentTime;
-            // No need to spam events.
-            if (this.previousMetadata && this.previousMetadata.start < time && time < this.previousMetadata.end) {
-                return;
-            }
-
-            // Still playing the same item.
-            var currentMetadata = this.currentlyPlaying;
-            if (this.previousMetadata && currentMetadata.title === this.previousMetadata.title) {
-                return;
-            }
-
-            // Remember the current metadata for the next call.
-            this.previousMetadata = currentMetadata;
-
-            // Broadcast event for the ui.
-            this.meister.trigger('itemMetadata', {
-                title: currentMetadata.title
-            });
-        }
-    }, {
-        key: 'onRequestBitrate',
-        value: function onRequestBitrate(e) {
-            var _this6 = this;
-
-            var previousCurrentTime = this.meister.currentTime;
-            var wasPlaying = this.meister.playing;
-
-            // Since we're setting a new source we could need updated drm settings.
-            if (e.drmConfig) {
-                this.meister.trigger('drmConfig', e.drmConfig);
-            }
-
-            this.meister.playerPlugin.mediaElement.src = '';
-            if (e.bitrateIndex === -1) {
-                this.meister.playerPlugin.mediaElement.src = this.masterPlaylist;
-            } else {
-                this.meister.playerPlugin.mediaElement.src = this.meister.utils.resolveUrl(this.masterPlaylist, this.qualityStreams[e.bitrateIndex].url);
-            }
-
-            // Reset playoffset and endtime, since we cleared the source.
-            this.playOffset = 0;
-            this.endTime = this.baseEndTime;
-
-            this.meister.one('playerLoadedMetadata', function () {
-                _this6.meister.currentTime = previousCurrentTime;
-
-                if (wasPlaying) {
-                    _this6.meister.play();
-                } else {
-                    _this6.meister.pause();
-                }
-            });
-        }
-    }, {
-        key: 'onError',
-        value: function onError(e, data) {
-            console.warn('Error in ' + this.name + ', type: ' + data.details + ', will attempt to recover.');
-            if (data.fatal) {
-                console.error('Can not recover from ' + data.type + ': ' + data.details + '.');
-            }
-        }
-
-        // copypaste from native-hls
-
-    }, {
-        key: 'pollResolution',
-        value: function pollResolution() {
-            var height = this.mediaElement.videoHeight;
-            var width = this.mediaElement.videoWidth;
-
-            if (this.currentResolution.width === width && this.currentResolution.height === height) return;
-
-            var newBitrate = this.qualityStreams.find(function (stream) {
-                return stream.resolution && stream.resolution.width === width && stream.resolution.height === height;
-            });
-
-            // This can happen while switching streams, no need to notify the player.
-            if (!newBitrate) return;
-
-            var newBitrateIndex = this.qualityStreams.indexOf(newBitrate);
-
-            this.meister.trigger('playerAutoSwitchBitrate', {
-                newBitrate: parseInt(newBitrate.bandwith, 10),
-                newBitrateIndex: newBitrateIndex
-            });
-
-            this.currentResolution = newBitrate.resolution;
-        }
-    }, {
-        key: 'getNewManifest',
-
-
-        // copypaste from native-hls
-        value: function getNewManifest() {
-            var _this7 = this;
-
-            this.loadManifest(this.childManifest).then(function (manifest) {
-                var lastMediaSequence = Object.keys(manifest.segments)[Object.keys(manifest.segments).length - 1];
-                var amountOfNewSegments = lastMediaSequence - _this7.lastMediaSequence;
-
-                for (var i = 0; i < amountOfNewSegments; i++) {
-                    _this7.endTime += manifest.segments[Object.keys(manifest.segments)[i]];
-                }
-
-                // Just for testing purposes:
-                _this7.duration = manifest.duration;
-                _this7.beginTime = _this7.endTime - manifest.duration;
-                _this7.lastMediaSequence = lastMediaSequence;
-
-                var hasDVR = manifest.duration > _this7.dvrThreshold && manifest.isLive;
-
-                if (_this7.config.dvrEnabled === false) {
-                    hasDVR = false;
-                }
-
-                _this7.meister.trigger('itemTimeInfo', {
-                    isLive: manifest.isLive,
-                    hasDVR: hasDVR,
-                    duration: _this7.duration,
-                    modifiedDuration: _this7.duration,
-                    endTime: _this7.endTime
-                });
-
-                _this7.manifestTimeoutId = setTimeout(function () {
-                    _this7.getNewManifest();
-                }, 5000);
-            }, function () {
-                console.warn('WARNING: Could not load manifest, retrying loading manifest.');
-                _this7.manifestTimeoutId = setTimeout(function () {
-                    _this7.getNewManifest();
-                }, 5000);
-            });
-        }
-
-        // copypaste from native-hls
-
-    }, {
-        key: 'loadManifest',
-        value: function loadManifest(src) {
-            var _this8 = this;
-
-            return new Promise(function (resolve) {
-                Http_1.get(src, function (res) {
-                    var m3u8 = new M3u8Parser(res.responseText);
-                    var manifest = m3u8.parse();
-
-                    if (manifest.streams.length) {
-                        if (_this8.config.filterAudioOnly) {
-                            _this8.qualityStreams = manifest.streams.filter(function (stream) {
-                                return stream.resolution;
-                            });
-                        } else {
-                            _this8.qualityStreams = manifest.streams;
-                        }
-
-                        _this8.onQualitysAvailable();
-
-                        _this8.childManifest = _this8.meister.utils.resolveUrl(src, manifest.streams[0].url);
-                        // This is the master playlist we need to parse the sub playlist.
-                        _this8.loadManifest(_this8.meister.utils.resolveUrl(src, manifest.streams[0].url)).then(function (childManifest) {
-                            resolve(childManifest);
-                        });
-                    } else {
-                        resolve(manifest);
-                    }
-                });
-            });
-        }
-
-        // copypaste from native-hls
-
-    }, {
-        key: 'onQualitysAvailable',
-        value: function onQualitysAvailable() {
-            var bitrates = [];
-
-            // Bitrate 0 means auto quality.
-            bitrates.push({
-                bitrate: 0,
-                index: -1
-            });
-
-            for (var i = 0; i < this.qualityStreams.length; i++) {
-                var bitrate = this.qualityStreams[i];
-                bitrates.push({
-                    bitrate: parseInt(bitrate.bandwith, 10),
-                    index: i
-                });
-            }
-
-            // Trigger auto bitrate by default.
-            this.meister.trigger('itemBitrates', {
-                bitrates: bitrates,
-                currentIndex: -1
-            });
-        }
-    }, {
-        key: 'unload',
-        value: function unload() {
-            get(NativeHls.prototype.__proto__ || Object.getPrototypeOf(NativeHls.prototype), 'unload', this).call(this);
-            if (this.manifestTimeoutId) clearTimeout(this.manifestTimeoutId);
-            if (this.pollResolutionId) clearInterval(this.pollResolutionId);
-
-            this.meister.remove(this.events);
-
-            this.duration = 0;
-            this.endTime = 0;
-            this.baseEndTime = 0;
-            this.beginTime = 0;
-            this.mediaSequence = 0;
-            this.lastMediaSequence = 0;
-            this.childManifest = null;
-            this.qualityStreams = [];
-            this.masterPlaylist = null;
-            this.manifestTimeoutId = null;
-            this.pollResolutionId = null;
-            this.currentResolution = {
-                width: 0,
-                height: 0
-            };
-            this.mediaElement = null;
-        }
-    }, {
-        key: 'destroy',
-        value: function destroy() {
-            get(NativeHls.prototype.__proto__ || Object.getPrototypeOf(NativeHls.prototype), 'destroy', this).call(this);
-        }
-    }, {
-        key: 'currentItem',
-        get: function get$$1() {
-            var metadata = this.currentlyPlaying;
-
-            var currentItem = {
-                src: this.item.src,
-                type: this.item.type,
-                title: metadata.title,
-                bitrate: metadata.bitrate
-            };
-
-            return currentItem;
-        }
-    }, {
-        key: 'currentlyPlaying',
-        get: function get$$1() {
-            // Prepare return object.
-            var metadata = {
-                bitrate: 0,
-                title: ''
-            };
-
-            // Traverse backwards since it is more likely that the player is near the end
-            var data = null;
-            var time = this.meister.currentTime;
-            for (var i = this.metadata.length - 1; i >= 0; i--) {
-                if (this.metadata[i].start < time && time < this.metadata[i].end) {
-                    data = this.metadata[i];
-                    break;
-                }
-            }
-
-            if (data) {
-                metadata.title = data.title;
-                metadata.start = data.start;
-                metadata.end = data.end;
-                metadata.duration = data.end - data.start;
-            }
-
-            return metadata;
-        }
-    }], [{
-        key: 'pluginName',
-        get: function get$$1() {
-            return 'NativeHls';
-        }
-    }]);
-    return NativeHls;
-}(Meister.MediaPlugin);
-
-Meister.registerPlugin(NativeHls$1.pluginName, NativeHls$1);
-
-export default NativeHls$1;
+/***/ })
+/******/ ]);
 //# sourceMappingURL=NativeHls.js.map

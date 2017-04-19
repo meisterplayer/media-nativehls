@@ -499,4 +499,6 @@ class NativeHls extends Meister.MediaPlugin {
 }
 
 Meister.registerPlugin(NativeHls.pluginName, NativeHls);
+Meister.registerPlugin('nativehls', NativeHls);
+
 export default NativeHls;
