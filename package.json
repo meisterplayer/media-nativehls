@@ -1,5 +1,5 @@
 {
-  "name": "meister-plugin-nativehls",
+  "name": "@meisterplayer/plugin-nativehls",
   "version": "5.0.1",
   "description": "Meister plugin for playback of HLS in browsers that support it natively (ex. Safari)",
   "main": "dist/NativeHls.js",
