@@ -21,7 +21,12 @@ class NativeHls extends Meister.MediaPlugin {
         this.previousLevel = -1;
         this.lowestLevel = 0;
 
-        this.dvrThreshold = this.config.dvrThreshold || 300;
+        this.dvrThreshold = this.config.dvrThreshold;
+
+        if (typeof this.dvrThreshold === 'undefined') {
+            this.dvrThreshold = 300;
+        }
+
 
         // new
         this.duration = 0;
