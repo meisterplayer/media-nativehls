@@ -30,7 +30,7 @@ class NativeHls extends Meister.MediaPlugin {
 
 
         // new
-        this.duration = 0;
+        this.mediaDuration = 0;
         this.endTime = 0;
         this.beginTime = 0;
         this.mediaSequence = 0;
@@ -85,7 +85,6 @@ class NativeHls extends Meister.MediaPlugin {
                         errorCode: Meister.ErrorCodes.NOT_SUPPORTED,
                     });
                 }
-
             }
 
             if (item.drm || item.drmConfig) {
@@ -121,7 +120,7 @@ class NativeHls extends Meister.MediaPlugin {
 
         this.previousLevel = -1;
         this.lowestLevel = 0;
-        this.duration = 0;
+        this.mediaDuration = 0;
         this.item = null;
     }
 
@@ -149,11 +148,6 @@ class NativeHls extends Meister.MediaPlugin {
             this.mediaElement.src = item.src;
             this.masterPlaylist = item.src;
 
-            // Display the correct title.
-            this.on('_playerTimeUpdate', this._onPlayerTimeUpdate.bind(this));
-            this.on('_playerSeek', this._onPlayerSeek.bind(this));
-            this.on('requestSeek', this.onRequestSeek.bind(this));
-
             // Listen to control events.
             this.on('requestBitrate', this.onRequestBitrate.bind(this));
             this.on('requestGoLive', () => this.onRequestGoLive());
@@ -165,10 +159,10 @@ class NativeHls extends Meister.MediaPlugin {
             this.loadManifest(item.src).then((manifest) => {
                 this.endTime = manifest.duration;
                 this.baseEndTime = this.endTime;
-                this.duration = manifest.duration;
+                this.mediaDuration = manifest.duration;
                 this.mediaSequence = manifest.mediaSequence;
 
-                this.beginTime = this.endTime - this.duration;
+                this.beginTime = this.endTime - this.mediaDuration;
 
                 // Kinda weird, but let's roll with it for now..
                 const lastMediaSequence = Object.keys(manifest.segments)[(Object.keys(manifest.segments).length - 1)];
@@ -183,8 +177,8 @@ class NativeHls extends Meister.MediaPlugin {
                 this.meister.trigger('itemTimeInfo', {
                     isLive: manifest.isLive,
                     hasDVR,
-                    duration: this.duration,
-                    modifiedDuration: this.duration,
+                    duration: this.mediaDuration,
+                    modifiedDuration: this.mediaDuration,
                     endTime: this.endTime,
                 });
 
@@ -211,22 +205,40 @@ class NativeHls extends Meister.MediaPlugin {
         });
     }
 
+    get duration() {
+        return this.mediaDuration;
+    }
+
+    get currentTime() {
+        if (!this.player) { return NaN; }
+
+        const playOffset = this.endTime - this.mediaDuration;
+        return this.player.currentTime - playOffset;
+    }
+
+    set currentTime(time) {
+        if (!this.player) { return; }
+
+        const playOffset = this.endTime - this.mediaDuration;
+        this.player.currentTime = time + playOffset;
+    }
+
     _onPlayerTimeUpdate() {
-        const playOffset = this.endTime - this.duration;
+        const playOffset = this.endTime - this.mediaDuration;
 
         this.meister.trigger('playerTimeUpdate', {
-            currentTime: this.meister.currentTime - playOffset,
-            duration: this.duration,
+            currentTime: this.player.currentTime - playOffset,
+            duration: this.mediaDuration,
         });
 
         this.broadcastTitle();
     }
 
     _onPlayerSeek() {
-        const playOffset = this.endTime - this.duration;
+        const playOffset = this.endTime - this.mediaDuration;
 
-        const currentTime = this.meister.currentTime - playOffset;
-        const duration = this.duration;
+        const currentTime = this.player.currentTime - playOffset;
+        const duration = this.mediaDuration;
         const relativePosition = currentTime / duration;
 
         this.meister.trigger('playerSeek', {
@@ -240,35 +252,35 @@ class NativeHls extends Meister.MediaPlugin {
         let targetTime;
 
         if (Number.isFinite(e.relativePosition)) {
-            const playOffset = this.endTime - this.duration;
-            targetTime = (this.duration * e.relativePosition) + playOffset;
+            const playOffset = this.endTime - this.mediaDuration;
+            targetTime = (this.mediaDuration * e.relativePosition) + playOffset;
         } else if (Number.isFinite(e.timeOffset)) {
-            targetTime = this.meister.currentTime + e.timeOffset;
+            targetTime = this.player.currentTime + e.timeOffset;
         } else if (Number.isFinite(e.targetTime)) {
-            const playOffset = this.endTime - this.duration;
+            const playOffset = this.endTime - this.mediaDuration;
             targetTime = e.targetTime + playOffset;
         }
 
         // Check whether we are allowed to seek forward.
-        if (!e.forcedStart && this.blockSeekForward && targetTime > this.meister.currentTime) { return; }
+        if (!e.forcedStart && this.blockSeekForward && targetTime > this.player.currentTime) { return; }
 
         if (Number.isFinite(targetTime)) {
-            this.meister.currentTime = targetTime;
+            this.player.currentTime = targetTime;
         }
     }
 
     onRequestGoLive() {
-        if (isNaN(this.meister.duration)) {
+        if (isNaN(this.player.duration)) {
             this.meister.one('playerLoadedMetadata', () => {
                 this.onRequestGoLive();
             });
         } else {
-            this.meister.currentTime = this.endTime - 30;
+            this.player.currentTime = this.endTime - 30;
         }
     }
 
     broadcastTitle() {
-        const time = this.meister.currentTime;
+        const time = this.player.currentTime;
         // No need to spam events.
         if (this.previousMetadata &&
                 (this.previousMetadata.start < time && time < this.previousMetadata.end)
@@ -295,7 +307,7 @@ class NativeHls extends Meister.MediaPlugin {
 
 
     onRequestBitrate(e) {
-        const previousCurrentTime = this.meister.currentTime;
+        const previousCurrentTime = this.player.currentTime;
         const wasPlaying = this.meister.playing;
 
         // Since we're setting a new source we could need updated drm settings.
@@ -315,7 +327,7 @@ class NativeHls extends Meister.MediaPlugin {
         this.endTime = this.baseEndTime;
 
         this.meister.one('playerLoadedMetadata', () => {
-            this.meister.currentTime = previousCurrentTime;
+            this.player.currentTime = previousCurrentTime;
 
             if (wasPlaying) {
                 this.meister.play();
@@ -378,7 +390,7 @@ class NativeHls extends Meister.MediaPlugin {
 
         // Traverse backwards since it is more likely that the player is near the end
         let data = null;
-        const time = this.meister.currentTime;
+        const time = this.player.currentTime;
         for (let i = this.metadata.length - 1; i >= 0; i--) {
             if (this.metadata[i].start < time && time < this.metadata[i].end) {
                 data = this.metadata[i];
@@ -407,7 +419,7 @@ class NativeHls extends Meister.MediaPlugin {
             }
 
             // Just for testing purposes:
-            this.duration = manifest.duration;
+            this.mediaDuration = manifest.duration;
             this.beginTime = this.endTime - manifest.duration;
             this.lastMediaSequence = lastMediaSequence;
 
@@ -420,8 +432,8 @@ class NativeHls extends Meister.MediaPlugin {
             this.meister.trigger('itemTimeInfo', {
                 isLive: manifest.isLive,
                 hasDVR,
-                duration: this.duration,
-                modifiedDuration: this.duration,
+                duration: this.mediaDuration,
+                modifiedDuration: this.mediaDuration,
                 endTime: this.endTime,
             });
 
@@ -496,7 +508,7 @@ class NativeHls extends Meister.MediaPlugin {
 
         this.meister.remove(this.events);
 
-        this.duration = 0;
+        this.mediaDuration = 0;
         this.endTime = 0;
         this.baseEndTime = 0;
         this.beginTime = 0;
