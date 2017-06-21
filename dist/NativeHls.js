@@ -141,7 +141,11 @@ var NativeHls = function (_Meister$MediaPlugin) {
         _this.previousLevel = -1;
         _this.lowestLevel = 0;
 
-        _this.dvrThreshold = _this.config.dvrThreshold || 300;
+        _this.dvrThreshold = _this.config.dvrThreshold;
+
+        if (typeof _this.dvrThreshold === 'undefined') {
+            _this.dvrThreshold = 300;
+        }
 
         // new
         _this.duration = 0;
@@ -304,8 +308,19 @@ var NativeHls = function (_Meister$MediaPlugin) {
                         endTime: _this4.endTime
                     });
 
-                    // this.onMasterPlaylistLoaded(manifest);
-                    if (manifest.isLive) _this4.onRequestGoLive();
+                    // We don't want to request live when we want to start from the beginning.
+                    if (!item.startFromBeginning) {
+                        // this.onMasterPlaylistLoaded(manifest);
+                        if (manifest.isLive) _this4.onRequestGoLive();
+                    } else {
+                        if (isNaN(_this4.meister.duration)) {
+                            _this4.meister.one('playerCanPlay', function () {
+                                _this4.meister.currentTime = 0;
+                            });
+                        } else {
+                            _this4.meister.currentTime = 0;
+                        }
+                    }
 
                     _this4.manifestTimeoutId = setTimeout(function () {
                         _this4.getNewManifest();
