@@ -86,3 +86,15 @@ var meisterPlayer = new Meister('#player', {
     }
 });
 ```
+
+### startFromBeginning *[Boolean]* (default: false) ###
+
+Start from the beginning of the live stream. (VOD streams will always begin from the beginning).
+
+``` JavaScript
+meisterPlayer.setItem({
+    src: 'https://example.com/secure/stream/manifest.m3u8',
+    startFromBeginning: true,
+    type: 'm3u8'
+});
+```
