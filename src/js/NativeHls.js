@@ -183,8 +183,19 @@ class NativeHls extends Meister.MediaPlugin {
                     endTime: this.endTime,
                 });
 
-                // this.onMasterPlaylistLoaded(manifest);
-                if (manifest.isLive) this.onRequestGoLive();
+                // We don't want to request live when we want to start from the beginning.
+                if (!item.startFromBeginning) {
+                    // this.onMasterPlaylistLoaded(manifest);
+                    if (manifest.isLive) this.onRequestGoLive();
+                } else {
+                    if (isNaN(this.meister.duration)) {
+                        this.meister.one('playerCanPlay', () => {
+                            this.meister.currentTime = 0;
+                        });
+                    } else {
+                        this.meister.currentTime = 0;
+                    }
+                }
 
                 this.manifestTimeoutId = setTimeout(() => {
                     this.getNewManifest();
