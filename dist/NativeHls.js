@@ -64,7 +64,7 @@ module.exports =
 /******/ 	__webpack_require__.p = "/";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 4);
+/******/ 	return __webpack_require__(__webpack_require__.s = 5);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -108,6 +108,10 @@ var _Http2 = _interopRequireDefault(_Http);
 var _M3u8Parser = __webpack_require__(3);
 
 var _M3u8Parser2 = _interopRequireDefault(_M3u8Parser);
+
+var _package = __webpack_require__(4);
+
+var _package2 = _interopRequireDefault(_package);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -672,6 +676,11 @@ var NativeHls = function (_Meister$MediaPlugin) {
         get: function get() {
             return 'NativeHls';
         }
+    }, {
+        key: 'pluginVersion',
+        get: function get() {
+            return _package2.default.version;
+        }
     }]);
 
     return NativeHls;
@@ -1152,6 +1161,37 @@ exports.default = M3u8Parser;
 
 /***/ }),
 /* 4 */
+/***/ (function(module, exports) {
+
+module.exports = {
+	"name": "@meisterplayer/plugin-nativehls",
+	"version": "5.2.0",
+	"description": "Meister plugin for playback of HLS in browsers that support it natively (ex. Safari)",
+	"main": "dist/NativeHls.js",
+	"keywords": [
+		"meister",
+		"video",
+		"plugin",
+		"hls"
+	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/meisterplayer/media-nativehls.git"
+	},
+	"author": "Triple",
+	"license": "Apache-2.0",
+	"dependencies": {},
+	"devDependencies": {
+		"meister-gulp-webpack-tasks": "^1.0.6",
+		"meister-js-dev": "^3.1.0",
+		"babel-preset-es2015": "^6.24.0",
+		"babel-preset-es2017": "^6.22.0",
+		"gulp": "^3.9.1"
+	}
+};
+
+/***/ }),
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__(0);
