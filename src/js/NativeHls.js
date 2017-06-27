@@ -1,5 +1,6 @@
 import Http from './utils/Http';
 import M3u8Parser from './utils/M3u8Parser';
+import packageJson from '../../package.json';
 
 const POLL_INTERVAL = 1000;
 
@@ -55,6 +56,10 @@ class NativeHls extends Meister.MediaPlugin {
 
     static get pluginName() {
         return 'NativeHls';
+    }
+
+    static get pluginVersion() {
+        return packageJson.version;
     }
 
     isItemSupported(item) {
