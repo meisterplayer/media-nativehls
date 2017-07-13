@@ -152,7 +152,7 @@ var NativeHls = function (_Meister$MediaPlugin) {
         }
 
         // new
-        _this.duration = 0;
+        _this.mediaDuration = 0;
         _this.endTime = 0;
         _this.beginTime = 0;
         _this.mediaSequence = 0;
@@ -237,7 +237,7 @@ var NativeHls = function (_Meister$MediaPlugin) {
 
             this.previousLevel = -1;
             this.lowestLevel = 0;
-            this.duration = 0;
+            this.mediaDuration = 0;
             this.item = null;
         }
     }, {
@@ -271,11 +271,6 @@ var NativeHls = function (_Meister$MediaPlugin) {
                 _this4.mediaElement.src = item.src;
                 _this4.masterPlaylist = item.src;
 
-                // Display the correct title.
-                _this4.on('_playerTimeUpdate', _this4._onPlayerTimeUpdate.bind(_this4));
-                _this4.on('_playerSeek', _this4._onPlayerSeek.bind(_this4));
-                _this4.on('requestSeek', _this4.onRequestSeek.bind(_this4));
-
                 // Listen to control events.
                 _this4.on('requestBitrate', _this4.onRequestBitrate.bind(_this4));
                 _this4.on('requestGoLive', function () {
@@ -289,10 +284,10 @@ var NativeHls = function (_Meister$MediaPlugin) {
                 _this4.loadManifest(item.src).then(function (manifest) {
                     _this4.endTime = manifest.duration;
                     _this4.baseEndTime = _this4.endTime;
-                    _this4.duration = manifest.duration;
+                    _this4.mediaDuration = manifest.duration;
                     _this4.mediaSequence = manifest.mediaSequence;
 
-                    _this4.beginTime = _this4.endTime - _this4.duration;
+                    _this4.beginTime = _this4.endTime - _this4.mediaDuration;
 
                     // Kinda weird, but let's roll with it for now..
                     var lastMediaSequence = Object.keys(manifest.segments)[Object.keys(manifest.segments).length - 1];
@@ -307,8 +302,8 @@ var NativeHls = function (_Meister$MediaPlugin) {
                     _this4.meister.trigger('itemTimeInfo', {
                         isLive: manifest.isLive,
                         hasDVR: hasDVR,
-                        duration: _this4.duration,
-                        modifiedDuration: _this4.duration,
+                        duration: _this4.mediaDuration,
+                        modifiedDuration: _this4.mediaDuration,
                         endTime: _this4.endTime
                     });
 
@@ -337,11 +332,11 @@ var NativeHls = function (_Meister$MediaPlugin) {
     }, {
         key: '_onPlayerTimeUpdate',
         value: function _onPlayerTimeUpdate() {
-            var playOffset = this.endTime - this.duration;
+            var playOffset = this.endTime - this.mediaDuration;
 
             this.meister.trigger('playerTimeUpdate', {
-                currentTime: this.meister.currentTime - playOffset,
-                duration: this.duration
+                currentTime: this.player.currentTime - playOffset,
+                duration: this.mediaDuration
             });
 
             this.broadcastTitle();
@@ -349,10 +344,10 @@ var NativeHls = function (_Meister$MediaPlugin) {
     }, {
         key: '_onPlayerSeek',
         value: function _onPlayerSeek() {
-            var playOffset = this.endTime - this.duration;
+            var playOffset = this.endTime - this.mediaDuration;
 
-            var currentTime = this.meister.currentTime - playOffset;
-            var duration = this.duration;
+            var currentTime = this.player.currentTime - playOffset;
+            var duration = this.mediaDuration;
             var relativePosition = currentTime / duration;
 
             this.meister.trigger('playerSeek', {
@@ -367,22 +362,22 @@ var NativeHls = function (_Meister$MediaPlugin) {
             var targetTime = void 0;
 
             if (Number.isFinite(e.relativePosition)) {
-                var playOffset = this.endTime - this.duration;
-                targetTime = this.duration * e.relativePosition + playOffset;
+                var playOffset = this.endTime - this.mediaDuration;
+                targetTime = this.mediaDuration * e.relativePosition + playOffset;
             } else if (Number.isFinite(e.timeOffset)) {
-                targetTime = this.meister.currentTime + e.timeOffset;
+                targetTime = this.player.currentTime + e.timeOffset;
             } else if (Number.isFinite(e.targetTime)) {
-                var _playOffset = this.endTime - this.duration;
+                var _playOffset = this.endTime - this.mediaDuration;
                 targetTime = e.targetTime + _playOffset;
             }
 
             // Check whether we are allowed to seek forward.
-            if (!e.forcedStart && this.blockSeekForward && targetTime > this.meister.currentTime) {
+            if (!e.forcedStart && this.blockSeekForward && targetTime > this.player.currentTime) {
                 return;
             }
 
             if (Number.isFinite(targetTime)) {
-                this.meister.currentTime = targetTime;
+                this.player.currentTime = targetTime;
             }
         }
     }, {
@@ -390,18 +385,18 @@ var NativeHls = function (_Meister$MediaPlugin) {
         value: function onRequestGoLive() {
             var _this5 = this;
 
-            if (isNaN(this.meister.duration)) {
+            if (isNaN(this.player.duration)) {
                 this.meister.one('playerLoadedMetadata', function () {
                     _this5.onRequestGoLive();
                 });
             } else {
-                this.meister.currentTime = this.endTime - 30;
+                this.player.currentTime = this.endTime - 30;
             }
         }
     }, {
         key: 'broadcastTitle',
         value: function broadcastTitle() {
-            var time = this.meister.currentTime;
+            var time = this.player.currentTime;
             // No need to spam events.
             if (this.previousMetadata && this.previousMetadata.start < time && time < this.previousMetadata.end) {
                 return;
@@ -426,7 +421,7 @@ var NativeHls = function (_Meister$MediaPlugin) {
         value: function onRequestBitrate(e) {
             var _this6 = this;
 
-            var previousCurrentTime = this.meister.currentTime;
+            var previousCurrentTime = this.player.currentTime;
             var wasPlaying = this.meister.playing;
 
             // Since we're setting a new source we could need updated drm settings.
@@ -446,7 +441,7 @@ var NativeHls = function (_Meister$MediaPlugin) {
             this.endTime = this.baseEndTime;
 
             this.meister.one('playerLoadedMetadata', function () {
-                _this6.meister.currentTime = previousCurrentTime;
+                _this6.player.currentTime = previousCurrentTime;
 
                 if (wasPlaying) {
                     _this6.meister.play();
@@ -507,7 +502,7 @@ var NativeHls = function (_Meister$MediaPlugin) {
                 }
 
                 // Just for testing purposes:
-                _this7.duration = manifest.duration;
+                _this7.mediaDuration = manifest.duration;
                 _this7.beginTime = _this7.endTime - manifest.duration;
                 _this7.lastMediaSequence = lastMediaSequence;
 
@@ -520,8 +515,8 @@ var NativeHls = function (_Meister$MediaPlugin) {
                 _this7.meister.trigger('itemTimeInfo', {
                     isLive: manifest.isLive,
                     hasDVR: hasDVR,
-                    duration: _this7.duration,
-                    modifiedDuration: _this7.duration,
+                    duration: _this7.mediaDuration,
+                    modifiedDuration: _this7.mediaDuration,
                     endTime: _this7.endTime
                 });
 
@@ -607,7 +602,7 @@ var NativeHls = function (_Meister$MediaPlugin) {
 
             this.meister.remove(this.events);
 
-            this.duration = 0;
+            this.mediaDuration = 0;
             this.endTime = 0;
             this.baseEndTime = 0;
             this.beginTime = 0;
@@ -628,6 +623,29 @@ var NativeHls = function (_Meister$MediaPlugin) {
         key: 'destroy',
         value: function destroy() {
             _get(NativeHls.prototype.__proto__ || Object.getPrototypeOf(NativeHls.prototype), 'destroy', this).call(this);
+        }
+    }, {
+        key: 'duration',
+        get: function get() {
+            return this.mediaDuration;
+        }
+    }, {
+        key: 'currentTime',
+        get: function get() {
+            if (!this.player) {
+                return NaN;
+            }
+
+            var playOffset = this.endTime - this.mediaDuration;
+            return this.player.currentTime - playOffset;
+        },
+        set: function set(time) {
+            if (!this.player) {
+                return;
+            }
+
+            var playOffset = this.endTime - this.mediaDuration;
+            this.player.currentTime = time + playOffset;
         }
     }, {
         key: 'currentItem',
@@ -654,7 +672,7 @@ var NativeHls = function (_Meister$MediaPlugin) {
 
             // Traverse backwards since it is more likely that the player is near the end
             var data = null;
-            var time = this.meister.currentTime;
+            var time = this.player.currentTime;
             for (var i = this.metadata.length - 1; i >= 0; i--) {
                 if (this.metadata[i].start < time && time < this.metadata[i].end) {
                     data = this.metadata[i];
@@ -1165,7 +1183,7 @@ exports.default = M3u8Parser;
 
 module.exports = {
 	"name": "@meisterplayer/plugin-nativehls",
-	"version": "5.2.0",
+	"version": "5.3.0",
 	"description": "Meister plugin for playback of HLS in browsers that support it natively (ex. Safari)",
 	"main": "dist/NativeHls.js",
 	"keywords": [
@@ -1187,6 +1205,9 @@ module.exports = {
 		"babel-preset-es2015": "^6.24.0",
 		"babel-preset-es2017": "^6.22.0",
 		"gulp": "^3.9.1"
+	},
+	"peerDependencies": {
+		"@meisterplayer/meisterplayer": ">= 5.1.0"
 	}
 };
 
