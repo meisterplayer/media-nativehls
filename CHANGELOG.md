@@ -1,3 +1,13 @@
+<a name="5.4.0"></a>
+# [5.4.0](https://github.com/meisterplayer/media-nativehls/compare/v5.3.0...v5.4.0) (2017-08-21)
+
+
+### Features
+
+* **startFromBeginning:** Add offset support ([9576478](https://github.com/meisterplayer/media-nativehls/commit/9576478))
+
+
+
 <a name="5.3.0"></a>
 # [5.3.0](https://github.com/meisterplayer/media-nativehls/compare/v5.2.0...v5.3.0) (2017-07-13)
 
