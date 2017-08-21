@@ -187,13 +187,20 @@ class NativeHls extends Meister.MediaPlugin {
                     // this.onMasterPlaylistLoaded(manifest);
                     if (manifest.isLive) this.onRequestGoLive();
                 } else {
-                    if (isNaN(this.meister.duration)) {
-                        this.meister.one('playerCanPlay', () => {
-                            this.meister.currentTime = 0;
+                    if (typeof item.startFromBeginning === 'object') {
+                        this.onRequestSeek({
+                            relativePosition: item.startFromBeginning.offset / this.duration,
                         });
                     } else {
-                        this.meister.currentTime = 0;
+                        if (isNaN(this.meister.duration)) {
+                            this.meister.one('playerCanPlay', () => {
+                                this.meister.currentTime = 0;
+                            });
+                        } else {
+                            this.meister.currentTime = 0;
+                        }
                     }
+
                 }
 
                 this.manifestTimeoutId = setTimeout(() => {

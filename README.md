@@ -98,3 +98,15 @@ meisterPlayer.setItem({
     type: 'm3u8'
 });
 ```
+
+Or you can give an object with an offset to start from a offset
+
+``` JavaScript
+meisterPlayer.setItem({
+    src: 'https://example.com/secure/stream/manifest.m3u8',
+    startFromBeginning: {
+        offset: 10, // Start from the "beginning" with an offset of 10 seconds
+    },
+    type: 'm3u8'
+});
+```
