@@ -2,6 +2,8 @@ import Http from './utils/Http';
 import M3u8Parser from './utils/M3u8Parser';
 import packageJson from '../../package.json';
 
+import Id3Tag from './models/Id3Tag';
+
 const POLL_INTERVAL = 1000;
 
 class NativeHls extends Meister.MediaPlugin {
@@ -152,6 +154,8 @@ class NativeHls extends Meister.MediaPlugin {
             this.on('requestBitrate', this.onRequestBitrate.bind(this));
             this.on('requestGoLive', () => this.onRequestGoLive());
 
+            this.mediaElement.textTracks.addEventListener('addtrack', this.onAddTextTrack.bind(this));
+
             this.pollResolutionId = setInterval(this.pollResolution.bind(this), POLL_INTERVAL);
 
             // Trigger this to make it look pretty.
@@ -274,6 +278,26 @@ class NativeHls extends Meister.MediaPlugin {
         if (Number.isFinite(targetTime)) {
             this.player.currentTime = targetTime;
         }
+    }
+
+    /**
+     * Event handler for addtrack
+     *
+     * @param {TrackEvent} event
+     * @memberof NativeHls
+     */
+    onAddTextTrack(event) {
+        const track = event.track;
+        track.mode = 'hidden';
+
+        track.addEventListener('cuechange', (cueChangeEvent) => {
+            /** @type {TextTrack} */
+            const target = cueChangeEvent.target;
+            const activeCues = Array.from(target.activeCues).filter(cue => cue.type === 'org.id3');
+            const id3Tags = activeCues.map(cue => new Id3Tag(cue.value.key, cue.value.data, cue.startTime, cue.endTime));
+
+            this.meister.trigger('id3tags', id3Tags);
+        });
     }
 
     onRequestGoLive() {
