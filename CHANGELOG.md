@@ -1,3 +1,13 @@
+<a name="5.5.0"></a>
+# [5.5.0](https://github.com/meisterplayer/media-nativehls/compare/v5.4.0...v5.5.0) (2017-09-04)
+
+
+### Features
+
+* **track:** Add support for reading id3 tags ([3759fbe](https://github.com/meisterplayer/media-nativehls/commit/3759fbe))
+
+
+
 <a name="5.4.0"></a>
 # [5.4.0](https://github.com/meisterplayer/media-nativehls/compare/v5.3.0...v5.4.0) (2017-08-21)
 

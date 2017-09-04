@@ -64,7 +64,7 @@ module.exports =
 /******/ 	__webpack_require__.p = "/";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 5);
+/******/ 	return __webpack_require__(__webpack_require__.s = 6);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -97,21 +97,27 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-var _Http = __webpack_require__(2);
+var _Http = __webpack_require__(3);
 
 var _Http2 = _interopRequireDefault(_Http);
 
-var _M3u8Parser = __webpack_require__(3);
+var _M3u8Parser = __webpack_require__(4);
 
 var _M3u8Parser2 = _interopRequireDefault(_M3u8Parser);
 
-var _package = __webpack_require__(4);
+var _package = __webpack_require__(5);
 
 var _package2 = _interopRequireDefault(_package);
+
+var _Id3Tag = __webpack_require__(2);
+
+var _Id3Tag2 = _interopRequireDefault(_Id3Tag);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -277,6 +283,8 @@ var NativeHls = function (_Meister$MediaPlugin) {
                     return _this4.onRequestGoLive();
                 });
 
+                _this4.mediaElement.textTracks.addEventListener('addtrack', _this4.onAddTextTrack.bind(_this4));
+
                 _this4.pollResolutionId = setInterval(_this4.pollResolution.bind(_this4), POLL_INTERVAL);
 
                 // Trigger this to make it look pretty.
@@ -312,12 +320,18 @@ var NativeHls = function (_Meister$MediaPlugin) {
                         // this.onMasterPlaylistLoaded(manifest);
                         if (manifest.isLive) _this4.onRequestGoLive();
                     } else {
-                        if (isNaN(_this4.meister.duration)) {
-                            _this4.meister.one('playerCanPlay', function () {
-                                _this4.meister.currentTime = 0;
+                        if (_typeof(item.startFromBeginning) === 'object') {
+                            _this4.onRequestSeek({
+                                relativePosition: item.startFromBeginning.offset / _this4.duration
                             });
                         } else {
-                            _this4.meister.currentTime = 0;
+                            if (isNaN(_this4.meister.duration)) {
+                                _this4.meister.one('playerCanPlay', function () {
+                                    _this4.meister.currentTime = 0;
+                                });
+                            } else {
+                                _this4.meister.currentTime = 0;
+                            }
                         }
                     }
 
@@ -380,14 +394,43 @@ var NativeHls = function (_Meister$MediaPlugin) {
                 this.player.currentTime = targetTime;
             }
         }
+
+        /**
+         * Event handler for addtrack
+         *
+         * @param {TrackEvent} event
+         * @memberof NativeHls
+         */
+
+    }, {
+        key: 'onAddTextTrack',
+        value: function onAddTextTrack(event) {
+            var _this5 = this;
+
+            var track = event.track;
+            track.mode = 'hidden';
+
+            track.addEventListener('cuechange', function (cueChangeEvent) {
+                /** @type {TextTrack} */
+                var target = cueChangeEvent.target;
+                var activeCues = Array.from(target.activeCues).filter(function (cue) {
+                    return cue.type === 'org.id3';
+                });
+                var id3Tags = activeCues.map(function (cue) {
+                    return new _Id3Tag2.default(cue.value.key, cue.value.data, cue.startTime, cue.endTime);
+                });
+
+                _this5.meister.trigger('id3tags', id3Tags);
+            });
+        }
     }, {
         key: 'onRequestGoLive',
         value: function onRequestGoLive() {
-            var _this5 = this;
+            var _this6 = this;
 
             if (isNaN(this.player.duration)) {
                 this.meister.one('playerLoadedMetadata', function () {
-                    _this5.onRequestGoLive();
+                    _this6.onRequestGoLive();
                 });
             } else {
                 this.player.currentTime = this.endTime - 30;
@@ -419,7 +462,7 @@ var NativeHls = function (_Meister$MediaPlugin) {
     }, {
         key: 'onRequestBitrate',
         value: function onRequestBitrate(e) {
-            var _this6 = this;
+            var _this7 = this;
 
             var previousCurrentTime = this.player.currentTime;
             var wasPlaying = this.meister.playing;
@@ -441,12 +484,12 @@ var NativeHls = function (_Meister$MediaPlugin) {
             this.endTime = this.baseEndTime;
 
             this.meister.one('playerLoadedMetadata', function () {
-                _this6.player.currentTime = previousCurrentTime;
+                _this7.player.currentTime = previousCurrentTime;
 
                 if (wasPlaying) {
-                    _this6.meister.play();
+                    _this7.meister.play();
                 } else {
-                    _this6.meister.pause();
+                    _this7.meister.pause();
                 }
             });
         }
@@ -491,42 +534,42 @@ var NativeHls = function (_Meister$MediaPlugin) {
 
         // copypaste from native-hls
         value: function getNewManifest() {
-            var _this7 = this;
+            var _this8 = this;
 
             this.loadManifest(this.childManifest).then(function (manifest) {
                 var lastMediaSequence = Object.keys(manifest.segments)[Object.keys(manifest.segments).length - 1];
-                var amountOfNewSegments = lastMediaSequence - _this7.lastMediaSequence;
+                var amountOfNewSegments = lastMediaSequence - _this8.lastMediaSequence;
 
                 for (var i = 0; i < amountOfNewSegments; i++) {
-                    _this7.endTime += manifest.segments[Object.keys(manifest.segments)[i]];
+                    _this8.endTime += manifest.segments[Object.keys(manifest.segments)[i]];
                 }
 
                 // Just for testing purposes:
-                _this7.mediaDuration = manifest.duration;
-                _this7.beginTime = _this7.endTime - manifest.duration;
-                _this7.lastMediaSequence = lastMediaSequence;
+                _this8.mediaDuration = manifest.duration;
+                _this8.beginTime = _this8.endTime - manifest.duration;
+                _this8.lastMediaSequence = lastMediaSequence;
 
-                var hasDVR = manifest.duration > _this7.dvrThreshold && manifest.isLive;
+                var hasDVR = manifest.duration > _this8.dvrThreshold && manifest.isLive;
 
-                if (_this7.config.dvrEnabled === false) {
+                if (_this8.config.dvrEnabled === false) {
                     hasDVR = false;
                 }
 
-                _this7.meister.trigger('itemTimeInfo', {
+                _this8.meister.trigger('itemTimeInfo', {
                     isLive: manifest.isLive,
                     hasDVR: hasDVR,
-                    duration: _this7.mediaDuration,
-                    modifiedDuration: _this7.mediaDuration,
-                    endTime: _this7.endTime
+                    duration: _this8.mediaDuration,
+                    modifiedDuration: _this8.mediaDuration,
+                    endTime: _this8.endTime
                 });
 
-                _this7.manifestTimeoutId = setTimeout(function () {
-                    _this7.getNewManifest();
+                _this8.manifestTimeoutId = setTimeout(function () {
+                    _this8.getNewManifest();
                 }, 5000);
             }, function () {
                 console.warn('WARNING: Could not load manifest, retrying loading manifest.');
-                _this7.manifestTimeoutId = setTimeout(function () {
-                    _this7.getNewManifest();
+                _this8.manifestTimeoutId = setTimeout(function () {
+                    _this8.getNewManifest();
                 }, 5000);
             });
         }
@@ -536,7 +579,7 @@ var NativeHls = function (_Meister$MediaPlugin) {
     }, {
         key: 'loadManifest',
         value: function loadManifest(src) {
-            var _this8 = this;
+            var _this9 = this;
 
             return new Promise(function (resolve) {
                 _Http2.default.get(src, function (res) {
@@ -544,19 +587,19 @@ var NativeHls = function (_Meister$MediaPlugin) {
                     var manifest = m3u8.parse();
 
                     if (manifest.streams.length) {
-                        if (_this8.config.filterAudioOnly) {
-                            _this8.qualityStreams = manifest.streams.filter(function (stream) {
+                        if (_this9.config.filterAudioOnly) {
+                            _this9.qualityStreams = manifest.streams.filter(function (stream) {
                                 return stream.resolution;
                             });
                         } else {
-                            _this8.qualityStreams = manifest.streams;
+                            _this9.qualityStreams = manifest.streams;
                         }
 
-                        _this8.onQualitysAvailable();
+                        _this9.onQualitysAvailable();
 
-                        _this8.childManifest = _this8.meister.utils.resolveUrl(src, manifest.streams[0].url);
+                        _this9.childManifest = _this9.meister.utils.resolveUrl(src, manifest.streams[0].url);
                         // This is the master playlist we need to parse the sub playlist.
-                        _this8.loadManifest(_this8.meister.utils.resolveUrl(src, manifest.streams[0].url)).then(function (childManifest) {
+                        _this9.loadManifest(_this9.meister.utils.resolveUrl(src, manifest.streams[0].url)).then(function (childManifest) {
                             resolve(childManifest);
                         });
                     } else {
@@ -711,6 +754,44 @@ exports.default = NativeHls;
 
 /***/ }),
 /* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Id3Tag =
+/**
+* Creates an instance of Id3Tag.
+*
+* @param {string} key
+* @param {ArrayBuffer} data
+* @param {number} [startTime=0]
+* @param {number} [endTime=0]
+* @memberof Id3Tag
+*/
+function Id3Tag(key, data) {
+    var startTime = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+    var endTime = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
+
+    _classCallCheck(this, Id3Tag);
+
+    this.data = data;
+    this.key = key;
+    this.type = 'org.id3';
+    this.startTime = startTime;
+    this.endTime = endTime;
+};
+
+exports.default = Id3Tag;
+
+/***/ }),
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1076,7 +1157,7 @@ Http.prototype.progress = function (callback) {
 module.exports = Http;
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1178,12 +1259,12 @@ var M3u8Parser = function () {
 exports.default = M3u8Parser;
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports) {
 
 module.exports = {
 	"name": "@meisterplayer/plugin-nativehls",
-	"version": "5.3.0",
+	"version": "5.5.0",
 	"description": "Meister plugin for playback of HLS in browsers that support it natively (ex. Safari)",
 	"main": "dist/NativeHls.js",
 	"keywords": [
@@ -1212,7 +1293,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__(0);
