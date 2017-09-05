@@ -420,7 +420,7 @@ var NativeHls = function (_Meister$MediaPlugin) {
                     return new _Id3Tag2.default(cue.value.key, cue.value.data, cue.startTime, cue.endTime);
                 });
 
-                _this5.meister.trigger('id3tags', id3Tags);
+                _this5.meister.trigger('id3Tags', id3Tags);
             });
         }
     }, {
@@ -1264,7 +1264,7 @@ exports.default = M3u8Parser;
 
 module.exports = {
 	"name": "@meisterplayer/plugin-nativehls",
-	"version": "5.5.0",
+	"version": "5.5.1",
 	"description": "Meister plugin for playback of HLS in browsers that support it natively (ex. Safari)",
 	"main": "dist/NativeHls.js",
 	"keywords": [

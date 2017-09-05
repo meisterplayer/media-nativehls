@@ -1,3 +1,13 @@
+<a name="5.5.1"></a>
+## [5.5.1](https://github.com/meisterplayer/media-nativehls/compare/v5.5.0...v5.5.1) (2017-09-05)
+
+
+### Bug Fixes
+
+* **events:** Fix event names for id3Tags ([31c24e6](https://github.com/meisterplayer/media-nativehls/commit/31c24e6))
+
+
+
 <a name="5.5.0"></a>
 # [5.5.0](https://github.com/meisterplayer/media-nativehls/compare/v5.4.0...v5.5.0) (2017-09-04)
 
