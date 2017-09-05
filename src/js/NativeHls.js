@@ -296,7 +296,7 @@ class NativeHls extends Meister.MediaPlugin {
             const activeCues = Array.from(target.activeCues).filter(cue => cue.type === 'org.id3');
             const id3Tags = activeCues.map(cue => new Id3Tag(cue.value.key, cue.value.data, cue.startTime, cue.endTime));
 
-            this.meister.trigger('id3tags', id3Tags);
+            this.meister.trigger('id3Tags', id3Tags);
         });
     }
 
