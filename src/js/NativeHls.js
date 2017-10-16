@@ -135,74 +135,69 @@ class NativeHls extends Meister.MediaPlugin {
         });
     }
 
-    load(item) {
+    async load(item) {
         super.load(item);
         this.item = item;
 
-        return new Promise((resolve) => {
-            this.mediaElement = this.player.mediaElement;
-            this.mediaElement.src = item.src;
-            this.masterPlaylist = item.src;
+        this.mediaElement = this.player.mediaElement;
+        this.mediaElement.src = item.src;
+        this.masterPlaylist = item.src;
 
-            // Listen to control events.
-            this.on('requestBitrate', this.onRequestBitrate.bind(this));
-            this.on('requestGoLive', () => this.onRequestGoLive());
+        // Listen to control events.
+        this.on('requestBitrate', this.onRequestBitrate.bind(this));
+        this.on('requestGoLive', () => this.onRequestGoLive());
 
-            this.mediaElement.textTracks.addEventListener('addtrack', this.onAddTextTrack.bind(this));
+        this.mediaElement.textTracks.addEventListener('addtrack', this.onAddTextTrack.bind(this));
 
-            this.pollResolutionId = setInterval(this.pollResolution.bind(this), POLL_INTERVAL);
+        this.pollResolutionId = setInterval(this.pollResolution.bind(this), POLL_INTERVAL);
 
-            // Trigger this to make it look pretty.
-            // Loading the first playlist.
-            this.loadManifest(item.src).then((manifest) => {
-                this.endTime = manifest.duration;
-                this.baseEndTime = this.endTime;
-                this.mediaDuration = manifest.duration;
-                this.mediaSequence = manifest.mediaSequence;
+        // Trigger this to make it look pretty.
+        // Loading the first playlist.
+        const manifest = await this.loadManifest(item.src);
+        this.endTime = manifest.duration;
+        this.baseEndTime = this.endTime;
+        this.mediaDuration = manifest.duration;
+        this.mediaSequence = manifest.mediaSequence;
 
-                this.beginTime = this.endTime - this.mediaDuration;
+        this.beginTime = this.endTime - this.mediaDuration;
 
-                // Kinda weird, but let's roll with it for now..
-                const lastMediaSequence = Object.keys(manifest.segments)[(Object.keys(manifest.segments).length - 1)];
-                this.lastMediaSequence = lastMediaSequence;
+        // Kinda weird, but let's roll with it for now..
+        const lastMediaSequence = Object.keys(manifest.segments)[(Object.keys(manifest.segments).length - 1)];
+        this.lastMediaSequence = lastMediaSequence;
 
-                let hasDVR = ((manifest.duration > this.dvrThreshold) && manifest.isLive);
+        let hasDVR = ((manifest.duration > this.dvrThreshold) && manifest.isLive);
 
-                if (this.config.dvrEnabled === false) {
-                    hasDVR = false;
-                }
+        if (this.config.dvrEnabled === false) {
+            hasDVR = false;
+        }
 
-                this.meister.trigger('itemTimeInfo', {
-                    isLive: manifest.isLive,
-                    hasDVR,
-                    duration: this.mediaDuration,
-                    modifiedDuration: this.mediaDuration,
-                    endTime: this.endTime,
-                });
-
-                // We don't want to request live when we want to start from the beginning.
-                if (!item.startFromBeginning) {
-                    // this.onMasterPlaylistLoaded(manifest);
-                    if (manifest.isLive) this.onRequestGoLive();
-                } else if (typeof item.startFromBeginning === 'object') {
-                    this.onRequestSeek({
-                        relativePosition: item.startFromBeginning.offset / this.duration,
-                    });
-                } else if (isNaN(this.meister.duration)) {
-                    this.meister.one('playerCanPlay', () => {
-                        this.meister.currentTime = 0;
-                    });
-                } else {
-                    this.meister.currentTime = 0;
-                }
-
-                this.manifestTimeoutId = setTimeout(() => {
-                    this.getNewManifest();
-                }, 5000); // Amount of seconds should be dynamic (By using the manifest)
-            });
-
-            resolve();
+        this.meister.trigger('itemTimeInfo', {
+            isLive: manifest.isLive,
+            hasDVR,
+            duration: this.mediaDuration,
+            modifiedDuration: this.mediaDuration,
+            endTime: this.endTime,
         });
+
+        // We don't want to request live when we want to start from the beginning.
+        if (!item.startFromBeginning) {
+            // this.onMasterPlaylistLoaded(manifest);
+            if (manifest.isLive) this.onRequestGoLive();
+        } else if (typeof item.startFromBeginning === 'object') {
+            this.onRequestSeek({
+                relativePosition: item.startFromBeginning.offset / this.duration,
+            });
+        } else if (isNaN(this.meister.duration)) {
+            this.meister.one('playerCanPlay', () => {
+                this.meister.currentTime = 0;
+            });
+        } else {
+            this.meister.currentTime = 0;
+        }
+
+        this.manifestTimeoutId = setTimeout(() => {
+            this.getNewManifest();
+        }, 5000); // Amount of seconds should be dynamic (By using the manifest)
     }
 
     get duration() {
@@ -361,8 +356,9 @@ class NativeHls extends Meister.MediaPlugin {
     }
 
     // copypaste from native-hls
-    getNewManifest() {
-        this.loadManifest(this.childManifest).then((manifest) => {
+    async getNewManifest() {
+        try {
+            const manifest = await this.loadManifest(this.childManifest);
             const lastMediaSequence = Object.keys(manifest.segments)[(Object.keys(manifest.segments).length - 1)];
             const amountOfNewSegments = lastMediaSequence - this.lastMediaSequence;
 
@@ -392,41 +388,37 @@ class NativeHls extends Meister.MediaPlugin {
             this.manifestTimeoutId = setTimeout(() => {
                 this.getNewManifest();
             }, 5000);
-        }, () => {
-            console.warn('WARNING: Could not load manifest, retrying loading manifest.');
+        } catch (err) {
+            console.warn('WARNING: Could not load manifest, retrying loading manifest.', err);
             this.manifestTimeoutId = setTimeout(() => {
                 this.getNewManifest();
             }, 5000);
-        });
+        }
     }
 
     // copypaste from native-hls
-    loadManifest(src) {
-        return new Promise(async (resolve) => {
-            const response = await fetch(src);
-            const text = await response.text();
+    async loadManifest(src) {
+        const response = await fetch(src);
+        const text = await response.text();
 
-            const m3u8 = new M3u8Parser(text);
-            const manifest = m3u8.parse();
+        const m3u8 = new M3u8Parser(text);
+        const manifest = m3u8.parse();
 
-            if (manifest.streams.length) {
-                if (this.config.filterAudioOnly) {
-                    this.qualityStreams = manifest.streams.filter(stream => stream.resolution);
-                } else {
-                    this.qualityStreams = manifest.streams;
-                }
-
-                this.onQualitysAvailable();
-
-                this.childManifest = this.meister.utils.resolveUrl(src, manifest.streams[0].url);
-                // This is the master playlist we need to parse the sub playlist.
-                this.loadManifest(this.meister.utils.resolveUrl(src, manifest.streams[0].url)).then((childManifest) => {
-                    resolve(childManifest);
-                });
+        if (manifest.streams.length) {
+            if (this.config.filterAudioOnly) {
+                this.qualityStreams = manifest.streams.filter(stream => stream.resolution);
             } else {
-                resolve(manifest);
+                this.qualityStreams = manifest.streams;
             }
-        });
+
+            this.onQualitysAvailable();
+
+            this.childManifest = this.meister.utils.resolveUrl(src, manifest.streams[0].url);
+            // This is the master playlist we need to parse the sub playlist.
+            return this.loadManifest(this.meister.utils.resolveUrl(src, manifest.streams[0].url));
+        }
+
+        return manifest;
     }
 
     // copypaste from native-hls
