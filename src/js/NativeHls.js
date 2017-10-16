@@ -13,9 +13,6 @@ class NativeHls extends Meister.MediaPlugin {
 
         this.audioMode = false;
 
-        this.metadata = [];
-        this.previousMetadata = null;
-
         // Middleware promise chain.
         this.next = next;
 
@@ -113,7 +110,6 @@ class NativeHls extends Meister.MediaPlugin {
     }
 
     resetPrivates() {
-        this.metadata = [];
         this.previousMetadata = null;
 
         this.manifestParsed = false;
@@ -234,8 +230,6 @@ class NativeHls extends Meister.MediaPlugin {
             currentTime: this.player.currentTime - playOffset,
             duration: this.mediaDuration,
         });
-
-        this.broadcastTitle();
     }
 
     _onPlayerSeek() {
@@ -303,33 +297,6 @@ class NativeHls extends Meister.MediaPlugin {
         }
     }
 
-    broadcastTitle() {
-        const time = this.player.currentTime;
-        // No need to spam events.
-        if (this.previousMetadata &&
-                (this.previousMetadata.start < time && time < this.previousMetadata.end)
-            ) {
-            return;
-        }
-
-        // Still playing the same item.
-        const currentMetadata = this.currentlyPlaying;
-        if (this.previousMetadata &&
-                (currentMetadata.title === this.previousMetadata.title)
-            ) {
-            return;
-        }
-
-        // Remember the current metadata for the next call.
-        this.previousMetadata = currentMetadata;
-
-        // Broadcast event for the ui.
-        this.meister.trigger('itemMetadata', {
-            title: currentMetadata.title,
-        });
-    }
-
-
     onRequestBitrate(e) {
         const previousCurrentTime = this.player.currentTime;
         const wasPlaying = this.meister.playing;
@@ -391,46 +358,6 @@ class NativeHls extends Meister.MediaPlugin {
         });
 
         this.currentResolution = newBitrate.resolution;
-    }
-
-    get currentItem() {
-        const metadata = this.currentlyPlaying;
-
-        const currentItem = {
-            src: this.item.src,
-            type: this.item.type,
-            title: metadata.title,
-            bitrate: metadata.bitrate,
-        };
-
-        return currentItem;
-    }
-
-    get currentlyPlaying() {
-        // Prepare return object.
-        const metadata = {
-            bitrate: 0,
-            title: '',
-        };
-
-        // Traverse backwards since it is more likely that the player is near the end
-        let data = null;
-        const time = this.player.currentTime;
-        for (let i = this.metadata.length - 1; i >= 0; i--) {
-            if (this.metadata[i].start < time && time < this.metadata[i].end) {
-                data = this.metadata[i];
-                break;
-            }
-        }
-
-        if (data) {
-            metadata.title = data.title;
-            metadata.start = data.start;
-            metadata.end = data.end;
-            metadata.duration = data.end - data.start;
-        }
-
-        return metadata;
     }
 
     // copypaste from native-hls
