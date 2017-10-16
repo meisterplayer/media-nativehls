@@ -30,7 +30,6 @@ class NativeHls extends Meister.MediaPlugin {
             this.dvrThreshold = 300;
         }
 
-
         // new
         this.mediaDuration = 0;
         this.endTime = 0;
@@ -67,7 +66,7 @@ class NativeHls extends Meister.MediaPlugin {
     isItemSupported(item) {
         return new Promise((resolve) => {
             if (item.type !== 'm3u8' && item.type !== 'm3u') {
-                return resolve({
+                resolve({
                     supported: false,
                     errorCode: Meister.ErrorCodes.WRONG_TYPE,
                 });
@@ -82,7 +81,7 @@ class NativeHls extends Meister.MediaPlugin {
                 // This means we are Safari on iOS but no indication of it in the user agent.
                 // Allow these browsers to pass.
                 if (!this.meister.browser.isFacebook && !this.meister.browser.isiOS) {
-                    return resolve({
+                    resolve({
                         supported: false,
                         errorCode: Meister.ErrorCodes.NOT_SUPPORTED,
                     });
@@ -99,7 +98,7 @@ class NativeHls extends Meister.MediaPlugin {
                             supported = true;
                         }
                     });
-                    return resolve({
+                    resolve({
                         supported,
                         errorCode: supported ? null : Meister.ErrorCodes.NO_DRM,
                     });
@@ -107,7 +106,7 @@ class NativeHls extends Meister.MediaPlugin {
 
                 this.meister.trigger('requestDrmKeySystemSupport', {});
             } else {
-                return resolve({
+                resolve({
                     supported: true,
                 });
             }
@@ -190,21 +189,16 @@ class NativeHls extends Meister.MediaPlugin {
                 if (!item.startFromBeginning) {
                     // this.onMasterPlaylistLoaded(manifest);
                     if (manifest.isLive) this.onRequestGoLive();
+                } else if (typeof item.startFromBeginning === 'object') {
+                    this.onRequestSeek({
+                        relativePosition: item.startFromBeginning.offset / this.duration,
+                    });
+                } else if (isNaN(this.meister.duration)) {
+                    this.meister.one('playerCanPlay', () => {
+                        this.meister.currentTime = 0;
+                    });
                 } else {
-                    if (typeof item.startFromBeginning === 'object') {
-                        this.onRequestSeek({
-                            relativePosition: item.startFromBeginning.offset / this.duration,
-                        });
-                    } else {
-                        if (isNaN(this.meister.duration)) {
-                            this.meister.one('playerCanPlay', () => {
-                                this.meister.currentTime = 0;
-                            });
-                        } else {
-                            this.meister.currentTime = 0;
-                        }
-                    }
-
+                    this.meister.currentTime = 0;
                 }
 
                 this.manifestTimeoutId = setTimeout(() => {
@@ -375,19 +369,20 @@ class NativeHls extends Meister.MediaPlugin {
         }
     }
 
-    // copypaste from native-hls
     pollResolution() {
         const height = this.mediaElement.videoHeight;
         const width = this.mediaElement.videoWidth;
 
-        if (this.currentResolution.width === width && this.currentResolution.height === height) return;
+        if (this.currentResolution.width === width && this.currentResolution.height === height) {
+            return;
+        }
 
-        const newBitrate = this.qualityStreams.find((stream) =>
-            stream.resolution && stream.resolution.width === width && stream.resolution.height === height
-        );
+        const newBitrate = this.qualityStreams.find(stream => stream.resolution && stream.resolution.width === width && stream.resolution.height === height);
 
         // This can happen while switching streams, no need to notify the player.
-        if (!newBitrate) return;
+        if (!newBitrate) {
+            return;
+        }
 
         const newBitrateIndex = this.qualityStreams.indexOf(newBitrate);
 
@@ -445,7 +440,7 @@ class NativeHls extends Meister.MediaPlugin {
             const lastMediaSequence = Object.keys(manifest.segments)[(Object.keys(manifest.segments).length - 1)];
             const amountOfNewSegments = lastMediaSequence - this.lastMediaSequence;
 
-            for (let i = 0; i < amountOfNewSegments; i++) {
+            for (let i = 0; i < amountOfNewSegments; i += 1) {
                 this.endTime += manifest.segments[Object.keys(manifest.segments)[i]];
             }
 
@@ -509,21 +504,16 @@ class NativeHls extends Meister.MediaPlugin {
 
     // copypaste from native-hls
     onQualitysAvailable() {
-        const bitrates = [];
+        const bitrates = this.qualityStreams.map((bitrate, index) => ({
+            bitrate: parseInt(bitrate.bandwith, 10),
+            index,
+        }));
 
         // Bitrate 0 means auto quality.
-        bitrates.push({
+        bitrates.unshift({
             bitrate: 0,
             index: -1,
         });
-
-        for (let i = 0; i < this.qualityStreams.length; i++) {
-            const bitrate = this.qualityStreams[i];
-            bitrates.push({
-                bitrate: parseInt(bitrate.bandwith, 10),
-                index: i,
-            });
-        }
 
         // Trigger auto bitrate by default.
         this.meister.trigger('itemBitrates', {
@@ -534,8 +524,14 @@ class NativeHls extends Meister.MediaPlugin {
 
     unload() {
         super.unload();
-        if (this.manifestTimeoutId) clearTimeout(this.manifestTimeoutId);
-        if (this.pollResolutionId) clearInterval(this.pollResolutionId);
+
+        if (this.manifestTimeoutId) {
+            clearTimeout(this.manifestTimeoutId);
+        }
+
+        if (this.pollResolutionId) {
+            clearInterval(this.pollResolutionId);
+        }
 
         this.meister.remove(this.events);
 

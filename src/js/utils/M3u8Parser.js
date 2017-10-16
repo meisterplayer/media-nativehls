@@ -58,14 +58,14 @@ class M3u8Parser {
                 }
             }
 
-            const matchInfo = (/^#EXTINF:?([0-9\.]*)?,?(.*)?/).exec(line);
+            const matchInfo = (/^#EXTINF:?([0-9.]*)?,?(.*)?/).exec(line);
             if (matchInfo && matchInfo[1]) {
                 result.segments[previousMediaNumber] = parseFloat(matchInfo[1]);
-                previousMediaNumber++;
+                previousMediaNumber += 1;
                 result.duration += parseFloat(matchInfo[1]);
             }
 
-            const matchMediaSequence = (/^#EXT-X-MEDIA-SEQUENCE:?(\-?[0-9.]*)?/).exec(line);
+            const matchMediaSequence = (/^#EXT-X-MEDIA-SEQUENCE:?(-?[0-9.]*)?/).exec(line);
             if (matchMediaSequence && matchMediaSequence[1]) {
                 result.mediaSequence = parseInt(matchMediaSequence[1], 10);
                 previousMediaNumber = parseInt(matchMediaSequence[1], 10);
