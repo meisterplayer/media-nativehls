@@ -1,4 +1,3 @@
-import Http from './utils/Http';
 import M3u8Parser from './utils/M3u8Parser';
 import packageJson from '../../package.json';
 
@@ -476,29 +475,30 @@ class NativeHls extends Meister.MediaPlugin {
 
     // copypaste from native-hls
     loadManifest(src) {
-        return new Promise((resolve) => {
-            Http.get(src, (res) => {
-                const m3u8 = new M3u8Parser(res.responseText);
-                const manifest = m3u8.parse();
+        return new Promise(async (resolve) => {
+            const response = await fetch(src);
+            const text = await response.text();
 
-                if (manifest.streams.length) {
-                    if (this.config.filterAudioOnly) {
-                        this.qualityStreams = manifest.streams.filter((stream) => stream.resolution);
-                    } else {
-                        this.qualityStreams = manifest.streams;
-                    }
+            const m3u8 = new M3u8Parser(text);
+            const manifest = m3u8.parse();
 
-                    this.onQualitysAvailable();
-
-                    this.childManifest = this.meister.utils.resolveUrl(src, manifest.streams[0].url);
-                    // This is the master playlist we need to parse the sub playlist.
-                    this.loadManifest(this.meister.utils.resolveUrl(src, manifest.streams[0].url)).then((childManifest) => {
-                        resolve(childManifest);
-                    });
+            if (manifest.streams.length) {
+                if (this.config.filterAudioOnly) {
+                    this.qualityStreams = manifest.streams.filter(stream => stream.resolution);
                 } else {
-                    resolve(manifest);
+                    this.qualityStreams = manifest.streams;
                 }
-            });
+
+                this.onQualitysAvailable();
+
+                this.childManifest = this.meister.utils.resolveUrl(src, manifest.streams[0].url);
+                // This is the master playlist we need to parse the sub playlist.
+                this.loadManifest(this.meister.utils.resolveUrl(src, manifest.streams[0].url)).then((childManifest) => {
+                    resolve(childManifest);
+                });
+            } else {
+                resolve(manifest);
+            }
         });
     }
 
