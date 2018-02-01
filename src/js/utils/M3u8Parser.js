@@ -1,3 +1,26 @@
+function extractKeyInfo(keyLine) {
+    const keyInfo = keyLine.replace('#EXT-X-KEY:', '')
+    // All key value pairs are split with a ,
+    .split(',')
+    .reduce((result, keyValString) => {
+        // We only use the first equal sign per string
+        // Otherwise we might split something in an URL.
+        const firstEqualIndex = keyValString.indexOf('=');
+
+        // Retrieve key value pairs.
+        const key = keyValString.substring(0, firstEqualIndex);
+        const val = keyValString.substring(firstEqualIndex + 1);
+
+        // The values are displayed like: ""value"", so we remove the extra pair of "".
+        // eslint-disable-next-line no-param-reassign
+        result[key] = val.replace(/"/g, '');
+
+        return result;
+    }, {});
+
+    return keyInfo;
+}
+
 class M3u8Parser {
     constructor(text) {
         this.text = text;
@@ -31,6 +54,11 @@ class M3u8Parser {
 
             if (line.startsWith('#EXT-X-ENDLIST')) {
                 result.isLive = false;
+            }
+
+            if (line.startsWith('#EXT-X-KEY')) {
+                // Extracting the URI out of the key section
+                result.keyInfo = extractKeyInfo(line);
             }
 
             // #EXT-X-STREAM-INF:PROGRAM-ID=1,RESOLUTION=600x338,BANDWIDTH=712704

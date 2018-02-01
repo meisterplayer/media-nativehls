@@ -154,6 +154,19 @@ class NativeHls extends Meister.MediaPlugin {
         // Trigger this to make it look pretty.
         // Loading the first playlist.
         const manifest = await this.loadManifest(item.src);
+
+        if (manifest.keyInfo) {
+            if (manifest.keyInfo.URI) {
+                const drmServerUrl = manifest.keyInfo.URI.replace('skd:', 'https:');
+
+                this.meister.trigger('drmLicenseInfoAvailable', {
+                    fairplay: {
+                        drmServerUrl,
+                    },
+                });
+            }
+        }
+
         this.endTime = manifest.duration;
         this.baseEndTime = this.endTime;
         this.mediaDuration = manifest.duration;
