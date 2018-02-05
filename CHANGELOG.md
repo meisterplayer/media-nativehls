@@ -1,3 +1,13 @@
+<a name="5.6.0"></a>
+# [5.6.0](https://github.com/meisterplayer/media-nativehls/compare/v5.5.1...v5.6.0) (2018-02-05)
+
+
+### Features
+
+* **drm:** Extract DRM information from manifest ([2cc6004](https://github.com/meisterplayer/media-nativehls/commit/2cc6004))
+
+
+
 <a name="5.5.1"></a>
 ## [5.5.1](https://github.com/meisterplayer/media-nativehls/compare/v5.5.0...v5.5.1) (2017-09-05)
 

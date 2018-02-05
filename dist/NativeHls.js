@@ -64,7 +64,7 @@ module.exports =
 /******/ 	__webpack_require__.p = "/";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 6);
+/******/ 	return __webpack_require__(__webpack_require__.s = 5);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -103,15 +103,11 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-var _Http = __webpack_require__(3);
-
-var _Http2 = _interopRequireDefault(_Http);
-
-var _M3u8Parser = __webpack_require__(4);
+var _M3u8Parser = __webpack_require__(3);
 
 var _M3u8Parser2 = _interopRequireDefault(_M3u8Parser);
 
-var _package = __webpack_require__(5);
+var _package = __webpack_require__(4);
 
 var _package2 = _interopRequireDefault(_package);
 
@@ -120,6 +116,8 @@ var _Id3Tag = __webpack_require__(2);
 var _Id3Tag2 = _interopRequireDefault(_Id3Tag);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -140,9 +138,6 @@ var NativeHls = function (_Meister$MediaPlugin) {
         _this.manifestParsed = false;
 
         _this.audioMode = false;
-
-        _this.metadata = [];
-        _this.previousMetadata = null;
 
         // Middleware promise chain.
         _this.next = next;
@@ -190,7 +185,7 @@ var NativeHls = function (_Meister$MediaPlugin) {
 
             return new Promise(function (resolve) {
                 if (item.type !== 'm3u8' && item.type !== 'm3u') {
-                    return resolve({
+                    resolve({
                         supported: false,
                         errorCode: Meister.ErrorCodes.WRONG_TYPE
                     });
@@ -204,7 +199,7 @@ var NativeHls = function (_Meister$MediaPlugin) {
                     // This means we are Safari on iOS but no indication of it in the user agent.
                     // Allow these browsers to pass.
                     if (!_this2.meister.browser.isFacebook && !_this2.meister.browser.isiOS) {
-                        return resolve({
+                        resolve({
                             supported: false,
                             errorCode: Meister.ErrorCodes.NOT_SUPPORTED
                         });
@@ -219,7 +214,7 @@ var NativeHls = function (_Meister$MediaPlugin) {
                                 supported = true;
                             }
                         });
-                        return resolve({
+                        resolve({
                             supported: supported,
                             errorCode: supported ? null : Meister.ErrorCodes.NO_DRM
                         });
@@ -227,7 +222,7 @@ var NativeHls = function (_Meister$MediaPlugin) {
 
                     _this2.meister.trigger('requestDrmKeySystemSupport', {});
                 } else {
-                    return resolve({
+                    resolve({
                         supported: true
                     });
                 }
@@ -236,7 +231,6 @@ var NativeHls = function (_Meister$MediaPlugin) {
     }, {
         key: 'resetPrivates',
         value: function resetPrivates() {
-            this.metadata = [];
             this.previousMetadata = null;
 
             this.manifestParsed = false;
@@ -266,83 +260,115 @@ var NativeHls = function (_Meister$MediaPlugin) {
         }
     }, {
         key: 'load',
-        value: function load(item) {
-            var _this4 = this;
+        value: function () {
+            var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(item) {
+                var _this4 = this;
 
-            _get(NativeHls.prototype.__proto__ || Object.getPrototypeOf(NativeHls.prototype), 'load', this).call(this, item);
-            this.item = item;
+                var manifest, drmServerUrl, lastMediaSequence, hasDVR;
+                return regeneratorRuntime.wrap(function _callee$(_context) {
+                    while (1) {
+                        switch (_context.prev = _context.next) {
+                            case 0:
+                                _get(NativeHls.prototype.__proto__ || Object.getPrototypeOf(NativeHls.prototype), 'load', this).call(this, item);
+                                this.item = item;
 
-            return new Promise(function (resolve) {
-                _this4.mediaElement = _this4.player.mediaElement;
-                _this4.mediaElement.src = item.src;
-                _this4.masterPlaylist = item.src;
+                                this.mediaElement = this.player.mediaElement;
+                                this.mediaElement.src = item.src;
+                                this.masterPlaylist = item.src;
 
-                // Listen to control events.
-                _this4.on('requestBitrate', _this4.onRequestBitrate.bind(_this4));
-                _this4.on('requestGoLive', function () {
-                    return _this4.onRequestGoLive();
-                });
-
-                _this4.mediaElement.textTracks.addEventListener('addtrack', _this4.onAddTextTrack.bind(_this4));
-
-                _this4.pollResolutionId = setInterval(_this4.pollResolution.bind(_this4), POLL_INTERVAL);
-
-                // Trigger this to make it look pretty.
-                // Loading the first playlist.
-                _this4.loadManifest(item.src).then(function (manifest) {
-                    _this4.endTime = manifest.duration;
-                    _this4.baseEndTime = _this4.endTime;
-                    _this4.mediaDuration = manifest.duration;
-                    _this4.mediaSequence = manifest.mediaSequence;
-
-                    _this4.beginTime = _this4.endTime - _this4.mediaDuration;
-
-                    // Kinda weird, but let's roll with it for now..
-                    var lastMediaSequence = Object.keys(manifest.segments)[Object.keys(manifest.segments).length - 1];
-                    _this4.lastMediaSequence = lastMediaSequence;
-
-                    var hasDVR = manifest.duration > _this4.dvrThreshold && manifest.isLive;
-
-                    if (_this4.config.dvrEnabled === false) {
-                        hasDVR = false;
-                    }
-
-                    _this4.meister.trigger('itemTimeInfo', {
-                        isLive: manifest.isLive,
-                        hasDVR: hasDVR,
-                        duration: _this4.mediaDuration,
-                        modifiedDuration: _this4.mediaDuration,
-                        endTime: _this4.endTime
-                    });
-
-                    // We don't want to request live when we want to start from the beginning.
-                    if (!item.startFromBeginning) {
-                        // this.onMasterPlaylistLoaded(manifest);
-                        if (manifest.isLive) _this4.onRequestGoLive();
-                    } else {
-                        if (_typeof(item.startFromBeginning) === 'object') {
-                            _this4.onRequestSeek({
-                                relativePosition: item.startFromBeginning.offset / _this4.duration
-                            });
-                        } else {
-                            if (isNaN(_this4.meister.duration)) {
-                                _this4.meister.one('playerCanPlay', function () {
-                                    _this4.meister.currentTime = 0;
+                                // Listen to control events.
+                                this.on('requestBitrate', this.onRequestBitrate.bind(this));
+                                this.on('requestGoLive', function () {
+                                    return _this4.onRequestGoLive();
                                 });
-                            } else {
-                                _this4.meister.currentTime = 0;
-                            }
+
+                                this.mediaElement.textTracks.addEventListener('addtrack', this.onAddTextTrack.bind(this));
+
+                                this.pollResolutionId = setInterval(this.pollResolution.bind(this), POLL_INTERVAL);
+
+                                // Trigger this to make it look pretty.
+                                // Loading the first playlist.
+                                _context.next = 11;
+                                return this.loadManifest(item.src);
+
+                            case 11:
+                                manifest = _context.sent;
+
+
+                                if (manifest.keyInfo) {
+                                    if (manifest.keyInfo.URI) {
+                                        drmServerUrl = manifest.keyInfo.URI.replace('skd:', 'https:');
+
+
+                                        this.meister.trigger('drmLicenseInfoAvailable', {
+                                            fairplay: {
+                                                drmServerUrl: drmServerUrl
+                                            }
+                                        });
+                                    }
+                                }
+
+                                this.endTime = manifest.duration;
+                                this.baseEndTime = this.endTime;
+                                this.mediaDuration = manifest.duration;
+                                this.mediaSequence = manifest.mediaSequence;
+
+                                this.beginTime = this.endTime - this.mediaDuration;
+
+                                // Kinda weird, but let's roll with it for now..
+                                lastMediaSequence = Object.keys(manifest.segments)[Object.keys(manifest.segments).length - 1];
+
+                                this.lastMediaSequence = lastMediaSequence;
+
+                                hasDVR = manifest.duration > this.dvrThreshold && manifest.isLive;
+
+
+                                if (this.config.dvrEnabled === false) {
+                                    hasDVR = false;
+                                }
+
+                                this.meister.trigger('itemTimeInfo', {
+                                    isLive: manifest.isLive,
+                                    hasDVR: hasDVR,
+                                    duration: this.mediaDuration,
+                                    modifiedDuration: this.mediaDuration,
+                                    endTime: this.endTime
+                                });
+
+                                // We don't want to request live when we want to start from the beginning.
+                                if (!item.startFromBeginning) {
+                                    // this.onMasterPlaylistLoaded(manifest);
+                                    if (manifest.isLive) this.onRequestGoLive();
+                                } else if (_typeof(item.startFromBeginning) === 'object') {
+                                    this.onRequestSeek({
+                                        relativePosition: item.startFromBeginning.offset / this.duration
+                                    });
+                                } else if (isNaN(this.meister.duration)) {
+                                    this.meister.one('playerCanPlay', function () {
+                                        _this4.meister.currentTime = 0;
+                                    });
+                                } else {
+                                    this.meister.currentTime = 0;
+                                }
+
+                                this.manifestTimeoutId = setTimeout(function () {
+                                    _this4.getNewManifest();
+                                }, 5000); // Amount of seconds should be dynamic (By using the manifest)
+
+                            case 25:
+                            case 'end':
+                                return _context.stop();
                         }
                     }
+                }, _callee, this);
+            }));
 
-                    _this4.manifestTimeoutId = setTimeout(function () {
-                        _this4.getNewManifest();
-                    }, 5000); // Amount of seconds should be dynamic (By using the manifest)
-                });
+            function load(_x) {
+                return _ref.apply(this, arguments);
+            }
 
-                resolve();
-            });
-        }
+            return load;
+        }()
     }, {
         key: '_onPlayerTimeUpdate',
         value: function _onPlayerTimeUpdate() {
@@ -352,8 +378,6 @@ var NativeHls = function (_Meister$MediaPlugin) {
                 currentTime: this.player.currentTime - playOffset,
                 duration: this.mediaDuration
             });
-
-            this.broadcastTitle();
         }
     }, {
         key: '_onPlayerSeek',
@@ -437,29 +461,6 @@ var NativeHls = function (_Meister$MediaPlugin) {
             }
         }
     }, {
-        key: 'broadcastTitle',
-        value: function broadcastTitle() {
-            var time = this.player.currentTime;
-            // No need to spam events.
-            if (this.previousMetadata && this.previousMetadata.start < time && time < this.previousMetadata.end) {
-                return;
-            }
-
-            // Still playing the same item.
-            var currentMetadata = this.currentlyPlaying;
-            if (this.previousMetadata && currentMetadata.title === this.previousMetadata.title) {
-                return;
-            }
-
-            // Remember the current metadata for the next call.
-            this.previousMetadata = currentMetadata;
-
-            // Broadcast event for the ui.
-            this.meister.trigger('itemMetadata', {
-                title: currentMetadata.title
-            });
-        }
-    }, {
         key: 'onRequestBitrate',
         value: function onRequestBitrate(e) {
             var _this7 = this;
@@ -501,23 +502,24 @@ var NativeHls = function (_Meister$MediaPlugin) {
                 console.error('Can not recover from ' + data.type + ': ' + data.details + '.');
             }
         }
-
-        // copypaste from native-hls
-
     }, {
         key: 'pollResolution',
         value: function pollResolution() {
             var height = this.mediaElement.videoHeight;
             var width = this.mediaElement.videoWidth;
 
-            if (this.currentResolution.width === width && this.currentResolution.height === height) return;
+            if (this.currentResolution.width === width && this.currentResolution.height === height) {
+                return;
+            }
 
             var newBitrate = this.qualityStreams.find(function (stream) {
                 return stream.resolution && stream.resolution.width === width && stream.resolution.height === height;
             });
 
             // This can happen while switching streams, no need to notify the player.
-            if (!newBitrate) return;
+            if (!newBitrate) {
+                return;
+            }
 
             var newBitrateIndex = this.qualityStreams.indexOf(newBitrate);
 
@@ -528,107 +530,162 @@ var NativeHls = function (_Meister$MediaPlugin) {
 
             this.currentResolution = newBitrate.resolution;
         }
-    }, {
-        key: 'getNewManifest',
-
 
         // copypaste from native-hls
-        value: function getNewManifest() {
-            var _this8 = this;
 
-            this.loadManifest(this.childManifest).then(function (manifest) {
-                var lastMediaSequence = Object.keys(manifest.segments)[Object.keys(manifest.segments).length - 1];
-                var amountOfNewSegments = lastMediaSequence - _this8.lastMediaSequence;
+    }, {
+        key: 'getNewManifest',
+        value: function () {
+            var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2() {
+                var _this8 = this;
 
-                for (var i = 0; i < amountOfNewSegments; i++) {
-                    _this8.endTime += manifest.segments[Object.keys(manifest.segments)[i]];
-                }
+                var manifest, lastMediaSequence, amountOfNewSegments, i, hasDVR;
+                return regeneratorRuntime.wrap(function _callee2$(_context2) {
+                    while (1) {
+                        switch (_context2.prev = _context2.next) {
+                            case 0:
+                                _context2.prev = 0;
+                                _context2.next = 3;
+                                return this.loadManifest(this.childManifest);
 
-                // Just for testing purposes:
-                _this8.mediaDuration = manifest.duration;
-                _this8.beginTime = _this8.endTime - manifest.duration;
-                _this8.lastMediaSequence = lastMediaSequence;
+                            case 3:
+                                manifest = _context2.sent;
+                                lastMediaSequence = Object.keys(manifest.segments)[Object.keys(manifest.segments).length - 1];
+                                amountOfNewSegments = lastMediaSequence - this.lastMediaSequence;
 
-                var hasDVR = manifest.duration > _this8.dvrThreshold && manifest.isLive;
 
-                if (_this8.config.dvrEnabled === false) {
-                    hasDVR = false;
-                }
+                                for (i = 0; i < amountOfNewSegments; i += 1) {
+                                    this.endTime += manifest.segments[Object.keys(manifest.segments)[i]];
+                                }
 
-                _this8.meister.trigger('itemTimeInfo', {
-                    isLive: manifest.isLive,
-                    hasDVR: hasDVR,
-                    duration: _this8.mediaDuration,
-                    modifiedDuration: _this8.mediaDuration,
-                    endTime: _this8.endTime
-                });
+                                // Just for testing purposes:
+                                this.mediaDuration = manifest.duration;
+                                this.beginTime = this.endTime - manifest.duration;
+                                this.lastMediaSequence = lastMediaSequence;
 
-                _this8.manifestTimeoutId = setTimeout(function () {
-                    _this8.getNewManifest();
-                }, 5000);
-            }, function () {
-                console.warn('WARNING: Could not load manifest, retrying loading manifest.');
-                _this8.manifestTimeoutId = setTimeout(function () {
-                    _this8.getNewManifest();
-                }, 5000);
-            });
-        }
+                                hasDVR = manifest.duration > this.dvrThreshold && manifest.isLive;
+
+
+                                if (this.config.dvrEnabled === false) {
+                                    hasDVR = false;
+                                }
+
+                                this.meister.trigger('itemTimeInfo', {
+                                    isLive: manifest.isLive,
+                                    hasDVR: hasDVR,
+                                    duration: this.mediaDuration,
+                                    modifiedDuration: this.mediaDuration,
+                                    endTime: this.endTime
+                                });
+
+                                this.manifestTimeoutId = setTimeout(function () {
+                                    _this8.getNewManifest();
+                                }, 5000);
+                                _context2.next = 20;
+                                break;
+
+                            case 16:
+                                _context2.prev = 16;
+                                _context2.t0 = _context2['catch'](0);
+
+                                console.warn('WARNING: Could not load manifest, retrying loading manifest.', _context2.t0);
+                                this.manifestTimeoutId = setTimeout(function () {
+                                    _this8.getNewManifest();
+                                }, 5000);
+
+                            case 20:
+                            case 'end':
+                                return _context2.stop();
+                        }
+                    }
+                }, _callee2, this, [[0, 16]]);
+            }));
+
+            function getNewManifest() {
+                return _ref2.apply(this, arguments);
+            }
+
+            return getNewManifest;
+        }()
 
         // copypaste from native-hls
 
     }, {
         key: 'loadManifest',
-        value: function loadManifest(src) {
-            var _this9 = this;
+        value: function () {
+            var _ref3 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(src) {
+                var response, text, m3u8, manifest;
+                return regeneratorRuntime.wrap(function _callee3$(_context3) {
+                    while (1) {
+                        switch (_context3.prev = _context3.next) {
+                            case 0:
+                                _context3.next = 2;
+                                return fetch(src);
 
-            return new Promise(function (resolve) {
-                _Http2.default.get(src, function (res) {
-                    var m3u8 = new _M3u8Parser2.default(res.responseText);
-                    var manifest = m3u8.parse();
+                            case 2:
+                                response = _context3.sent;
+                                _context3.next = 5;
+                                return response.text();
 
-                    if (manifest.streams.length) {
-                        if (_this9.config.filterAudioOnly) {
-                            _this9.qualityStreams = manifest.streams.filter(function (stream) {
-                                return stream.resolution;
-                            });
-                        } else {
-                            _this9.qualityStreams = manifest.streams;
+                            case 5:
+                                text = _context3.sent;
+                                m3u8 = new _M3u8Parser2.default(text);
+                                manifest = m3u8.parse();
+
+                                if (!manifest.streams.length) {
+                                    _context3.next = 13;
+                                    break;
+                                }
+
+                                if (this.config.filterAudioOnly) {
+                                    this.qualityStreams = manifest.streams.filter(function (stream) {
+                                        return stream.resolution;
+                                    });
+                                } else {
+                                    this.qualityStreams = manifest.streams;
+                                }
+
+                                this.onQualitysAvailable();
+
+                                this.childManifest = this.meister.utils.resolveUrl(src, manifest.streams[0].url);
+                                // This is the master playlist we need to parse the sub playlist.
+                                return _context3.abrupt('return', this.loadManifest(this.meister.utils.resolveUrl(src, manifest.streams[0].url)));
+
+                            case 13:
+                                return _context3.abrupt('return', manifest);
+
+                            case 14:
+                            case 'end':
+                                return _context3.stop();
                         }
-
-                        _this9.onQualitysAvailable();
-
-                        _this9.childManifest = _this9.meister.utils.resolveUrl(src, manifest.streams[0].url);
-                        // This is the master playlist we need to parse the sub playlist.
-                        _this9.loadManifest(_this9.meister.utils.resolveUrl(src, manifest.streams[0].url)).then(function (childManifest) {
-                            resolve(childManifest);
-                        });
-                    } else {
-                        resolve(manifest);
                     }
-                });
-            });
-        }
+                }, _callee3, this);
+            }));
+
+            function loadManifest(_x2) {
+                return _ref3.apply(this, arguments);
+            }
+
+            return loadManifest;
+        }()
 
         // copypaste from native-hls
 
     }, {
         key: 'onQualitysAvailable',
         value: function onQualitysAvailable() {
-            var bitrates = [];
+            var bitrates = this.qualityStreams.map(function (bitrate, index) {
+                return {
+                    bitrate: parseInt(bitrate.bandwith, 10),
+                    index: index
+                };
+            });
 
             // Bitrate 0 means auto quality.
-            bitrates.push({
+            bitrates.unshift({
                 bitrate: 0,
                 index: -1
             });
-
-            for (var i = 0; i < this.qualityStreams.length; i++) {
-                var bitrate = this.qualityStreams[i];
-                bitrates.push({
-                    bitrate: parseInt(bitrate.bandwith, 10),
-                    index: i
-                });
-            }
 
             // Trigger auto bitrate by default.
             this.meister.trigger('itemBitrates', {
@@ -640,8 +697,14 @@ var NativeHls = function (_Meister$MediaPlugin) {
         key: 'unload',
         value: function unload() {
             _get(NativeHls.prototype.__proto__ || Object.getPrototypeOf(NativeHls.prototype), 'unload', this).call(this);
-            if (this.manifestTimeoutId) clearTimeout(this.manifestTimeoutId);
-            if (this.pollResolutionId) clearInterval(this.pollResolutionId);
+
+            if (this.manifestTimeoutId) {
+                clearTimeout(this.manifestTimeoutId);
+            }
+
+            if (this.pollResolutionId) {
+                clearInterval(this.pollResolutionId);
+            }
 
             this.meister.remove(this.events);
 
@@ -689,48 +752,6 @@ var NativeHls = function (_Meister$MediaPlugin) {
 
             var playOffset = this.endTime - this.mediaDuration;
             this.player.currentTime = time + playOffset;
-        }
-    }, {
-        key: 'currentItem',
-        get: function get() {
-            var metadata = this.currentlyPlaying;
-
-            var currentItem = {
-                src: this.item.src,
-                type: this.item.type,
-                title: metadata.title,
-                bitrate: metadata.bitrate
-            };
-
-            return currentItem;
-        }
-    }, {
-        key: 'currentlyPlaying',
-        get: function get() {
-            // Prepare return object.
-            var metadata = {
-                bitrate: 0,
-                title: ''
-            };
-
-            // Traverse backwards since it is more likely that the player is near the end
-            var data = null;
-            var time = this.player.currentTime;
-            for (var i = this.metadata.length - 1; i >= 0; i--) {
-                if (this.metadata[i].start < time && time < this.metadata[i].end) {
-                    data = this.metadata[i];
-                    break;
-                }
-            }
-
-            if (data) {
-                metadata.title = data.title;
-                metadata.start = data.start;
-                metadata.end = data.end;
-                metadata.duration = data.end - data.start;
-            }
-
-            return metadata;
         }
     }], [{
         key: 'pluginName',
@@ -797,372 +818,6 @@ exports.default = Id3Tag;
 "use strict";
 
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-/**
- * @class httpModule
- * @type {{getPageByURL, handleResponse, parseCookie, queryStringToJsonObject, jsonObjectToQuerystring}}
- */
-
-var _totalMillisecondsDelta = 0,
-    _noop = function _noop() {},
-    _activeXHRs = [],
-    _totalBytesDelta = 0,
-    _maximumHistorySize = 7,
-    _totalBytesDeltaHistory = [],
-    _totalMillisecondsDeltaHistory = [],
-    _isObjLiteral = function _isObjLiteral(_obj) {
-    var _test = _obj;
-    return (typeof _obj === 'undefined' ? 'undefined' : _typeof(_obj)) !== 'object' || _obj === null ? false : function () {
-        while (!false) {
-            if (Object.getPrototypeOf(_test = Object.getPrototypeOf(_test)) === null) {
-                break;
-            }
-        }
-        return Object.getPrototypeOf(_obj) === _test;
-    }();
-},
-    _verifiedOptions = function _verifiedOptions(options) {
-    if (!_isObjLiteral(options)) {
-        console.error('Cannot construct http request, the options parameter is not an object literal.', options);
-        return false;
-    }
-
-    if (!('method' in options)) {
-        console.error('Cannot construct http request, the method was not specified.', options);
-        return false;
-    }
-
-    if (!('url' in options)) {
-        console.error('Cannot construct http request, the url was not specified.', options);
-        return false;
-    }
-
-    return true;
-},
-    _objectToQueryString = function _objectToQueryString(obj) {
-    var parts = [];
-    for (var key in obj) {
-        if (obj.hasOwnProperty(key)) {
-            parts.push(encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]));
-        }
-    }
-    return parts.join('&');
-},
-    _updateProgress = function _updateProgress(event) {
-    // Make sure to reset the bytes downloaded (can happen after an abort).
-    if (event.loaded < this.bytesDownloaded) {
-        this.bytesDownloaded = 0;
-    }
-
-    // Get the number of new bytes downloaded.
-    var bytesDelta = event.loaded - this.bytesDownloaded,
-        millisecondsDelta = event.timeStamp - this.timestamp;
-
-    // Update the total values.
-    _totalMillisecondsDelta += millisecondsDelta;
-    _totalBytesDelta += bytesDelta;
-    Http.totalBytesDownloaded += bytesDelta;
-
-    // Store local values.
-    this.bytesDownloaded = event.loaded;
-    this.totalSizeInBytes = event.total;
-    this.timestamp = event.timeStamp;
-
-    // Update the progress.
-    this.downloadProgress = this.bytesDownloaded / this.totalSizeInBytes;
-
-    Http.resetStatistics();
-};
-
-/**
- * Makes an HTTP request and serves as an advanced HTTP Api
- *
- * @param  {[type]}   options  [description]
- * @param  {Function} callback [description]
- * @return {[type]}            [description]
- */
-function Http(options, callback) {
-
-    if (!_verifiedOptions(options)) {
-        return;
-    }
-
-    this.instID = this.constructor.name + '.' + Math.random() * new Date().getTime();
-
-    var method = options.method,
-        url = options.url,
-        data = '',
-        timeout = 'timeout' in options ? options.timeout : 3000,
-        xhr;
-
-    this.timestamp = 0;
-    this.method = method;
-    this.url = url;
-
-    this.status = 0;
-    this.bytesDownloaded = 0;
-    this.totalSizeInBytes = 0;
-    this.downloadProgress = 0;
-    this.bandwidth = null;
-    this.timeOfRequest = null;
-    this.timeOfResponse = null;
-    this.roundTripTime = null;
-    this.onReady = null;
-    this.onProgress = null;
-    this.onLoadStart = null;
-    this.onError = null;
-    this.onSuccess = callback;
-
-    xhr = new XMLHttpRequest();
-
-    if ('data' in options) {
-        data = _objectToQueryString(options.data);
-    }
-
-    xhr.onreadystatechange = function (event) {
-        this.status = xhr.status;
-
-        if (this.onReady !== null) {
-            this.onReady();
-        }
-    }.bind(this);
-
-    xhr.onprogress = function (event) {
-        _updateProgress.call(this, event);
-
-        if (this.onProgress !== null) {
-            this.onProgress();
-        }
-    }.bind(this);
-
-    xhr.onloadstart = function (event) {
-        this.timestamp = event.timeStamp;
-
-        if (this.onLoadStart !== null) {
-            this.onLoadStart();
-        }
-    }.bind(this);
-
-    xhr.onerror = function (event) {
-        Http.downloadingRequests -= 1;
-
-        if (this.onError !== null) {
-            (this.onError || _noop)(xhr);
-        } else {
-            this.onSuccess(null);
-        }
-    }.bind(this);
-
-    xhr.onload = function (event) {
-        _updateProgress.call(this, event);
-
-        Http.downloadingRequests -= 1;
-
-        // Remove the active XHR from active XHRs
-        for (var i = 0; i < _activeXHRs.length; i++) {
-            var activeXHR = _activeXHRs[i];
-
-            if (activeXHR.id == this.instID) {
-                _activeXHRs.splice(i, 1);
-            }
-        }
-
-        this.timeOfResponse = new Date().getTime();
-        this.roundTripTime = this.timeOfResponse - this.timeOfRequest;
-        xhr.bandwidth = Math.floor(this.bytesDownloaded / this.roundTripTime * 8 * 1000);
-        this.bandwidth = xhr.bandwidth;
-        this.onSuccess(xhr);
-    }.bind(this);
-
-    // GET requests should have the data in the URL instead of the body
-    if (method === 'GET') {
-        url += data;
-    }
-
-    // Open the asynchronous request
-    xhr.open(method, url, true);
-
-    this.timeOfRequest = new Date().getTime();
-    Http.downloadingRequests += 1;
-
-    //Set the responseType
-    if ('responseType' in options) {
-        xhr.responseType = options.responseType;
-    }
-
-    // Add headers, must be done after open but before send (see mdn docs)
-    if ('headers' in options) {
-        for (var key in options.headers) {
-            if (options.headers.hasOwnProperty(key)) {
-                console.log('Setting header', key, 'with', options.headers[key]);
-                xhr.setRequestHeader(key, options.headers[key]);
-            }
-        }
-    }
-
-    _activeXHRs.push({
-        id: this.instID,
-        inst: this
-    });
-
-    try {
-        xhr.send(data);
-    } catch (ex) {
-        console.error('HTTP Request aborted due: ', ex);
-        (this.onError || _noop)(xhr);
-    }
-
-    // Listen to timeouts.
-    this.timeout = setTimeout(function () {
-        if (this.bytesDownloaded === 0) {
-            this.abort();
-
-            if (this.onError !== null) {
-                this.onError(xhr);
-            } else {
-                this.onSuccess(null);
-            }
-        }
-
-        clearTimeout(this.timeout);
-    }.bind(this), timeout);
-
-    this.xhr = xhr;
-}
-
-Http.downloadingRequests = 0;
-Http.totalBytesDownloaded = 0;
-Http.averagedBandwidth = 0;
-
-Http.get = function (url, callback) {
-    var options = {
-        url: url,
-        method: 'GET',
-        data: {}
-    };
-
-    return new Http(options, callback);
-};
-
-Http.post = function (url, data, callback) {
-    var options = {
-        url: url,
-        method: 'POST',
-        data: data
-    };
-
-    return new Http(options, callback);
-};
-
-Http.abortAll = function () {
-    for (var i = 0; i < _activeXHRs.length; i++) {
-        var activeXHR = _activeXHRs[i];
-        activeXHR.inst.abort();
-    }
-};
-
-Http.resetStatistics = function () {
-    var milliseconds = 0.0,
-        bytes = 0.0,
-        avgBandwidth = null,
-        i;
-
-    // Push the total milliseconds delta if there is data.
-    if (_totalMillisecondsDelta > 0) {
-        _totalMillisecondsDeltaHistory.push(_totalMillisecondsDelta);
-        _totalMillisecondsDelta = 0;
-
-        if (_totalMillisecondsDeltaHistory.length > _maximumHistorySize) {
-            _totalMillisecondsDeltaHistory.shift();
-        }
-    }
-
-    // Push the total bytes delta if there is data.
-    if (_totalBytesDelta > 0) {
-        _totalBytesDeltaHistory.push(_totalBytesDelta);
-        _totalBytesDelta = 0;
-        if (_totalBytesDeltaHistory.length > _maximumHistorySize) {
-            _totalBytesDeltaHistory.shift();
-        }
-    }
-
-    // Calculate the total of milliseconds.
-    for (i = 0; i < _totalMillisecondsDeltaHistory.length; i++) {
-        milliseconds += _totalMillisecondsDeltaHistory[i];
-    }
-
-    // Calculate the total of bytes.
-    for (i = 0; i < _totalBytesDeltaHistory.length; i++) {
-        bytes += _totalBytesDeltaHistory[i];
-    }
-
-    // Calculate the average bandwidth.
-    if (milliseconds > 0) {
-        avgBandwidth = bytes * 1000 / milliseconds;
-    }
-
-    Http.averagedBandwidth = Http.averagedBandwidth === 0 ? avgBandwidth : (Http.averagedBandwidth + avgBandwidth) / 2;
-
-    // Reset all values.
-    _totalMillisecondsDelta = 0;
-    _totalBytesDelta = 0;
-    //Http.totalBytesDownloaded = 0;
-};
-
-Http.prototype.abort = function () {
-    var xhr = this.xhr;
-    xhr.onerror = null;
-
-    // Abort the download.
-    xhr.abort();
-
-    // Update the number of active requests.
-    Http.downloadingRequests -= 1;
-};
-
-/**
- * Sugar syntax for when a request is done
- *
- * @param  {Function} callback [description]
- * @return {Function}          [description]
- */
-Http.prototype.done = function (callback) {
-    this.onSuccess = callback;
-    return this;
-};
-
-/**
- * Sugar syntax for when a request throws an error
- *
- * @param  {Function} callback [description]
- * @return {[type]}            [description]
- */
-Http.prototype.error = function (callback) {
-    this.onError = callback;
-    return this;
-};
-
-/**
- * Sugar syntax for when a request has progress
- *
- * @param  {Function} callback [description]
- * @return {[type]}            [description]
- */
-Http.prototype.progress = function (callback) {
-    this.onProgress = callback;
-    return this;
-};
-
-module.exports = Http;
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
@@ -1170,6 +825,28 @@ Object.defineProperty(exports, "__esModule", {
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function extractKeyInfo(keyLine) {
+    var keyInfo = keyLine.replace('#EXT-X-KEY:', '')
+    // All key value pairs are split with a ,
+    .split(',').reduce(function (result, keyValString) {
+        // We only use the first equal sign per string
+        // Otherwise we might split something in an URL.
+        var firstEqualIndex = keyValString.indexOf('=');
+
+        // Retrieve key value pairs.
+        var key = keyValString.substring(0, firstEqualIndex);
+        var val = keyValString.substring(firstEqualIndex + 1);
+
+        // The values are displayed like: ""value"", so we remove the extra pair of "".
+        // eslint-disable-next-line no-param-reassign
+        result[key] = val.replace(/"/g, '');
+
+        return result;
+    }, {});
+
+    return keyInfo;
+}
 
 var M3u8Parser = function () {
     function M3u8Parser(text) {
@@ -1210,6 +887,11 @@ var M3u8Parser = function () {
                     result.isLive = false;
                 }
 
+                if (line.startsWith('#EXT-X-KEY')) {
+                    // Extracting the URI out of the key section
+                    result.keyInfo = extractKeyInfo(line);
+                }
+
                 // #EXT-X-STREAM-INF:PROGRAM-ID=1,RESOLUTION=600x338,BANDWIDTH=712704
                 var matchBandwith = /^#EXT-X-STREAM-INF:.*BANDWIDTH=(\d*)?/.exec(line);
                 if (matchBandwith && matchBandwith[1]) {
@@ -1235,14 +917,14 @@ var M3u8Parser = function () {
                     }
                 }
 
-                var matchInfo = /^#EXTINF:?([0-9\.]*)?,?(.*)?/.exec(line);
+                var matchInfo = /^#EXTINF:?([0-9.]*)?,?(.*)?/.exec(line);
                 if (matchInfo && matchInfo[1]) {
                     result.segments[previousMediaNumber] = parseFloat(matchInfo[1]);
-                    previousMediaNumber++;
+                    previousMediaNumber += 1;
                     result.duration += parseFloat(matchInfo[1]);
                 }
 
-                var matchMediaSequence = /^#EXT-X-MEDIA-SEQUENCE:?(\-?[0-9.]*)?/.exec(line);
+                var matchMediaSequence = /^#EXT-X-MEDIA-SEQUENCE:?(-?[0-9.]*)?/.exec(line);
                 if (matchMediaSequence && matchMediaSequence[1]) {
                     result.mediaSequence = parseInt(matchMediaSequence[1], 10);
                     previousMediaNumber = parseInt(matchMediaSequence[1], 10);
@@ -1259,12 +941,12 @@ var M3u8Parser = function () {
 exports.default = M3u8Parser;
 
 /***/ }),
-/* 5 */
+/* 4 */
 /***/ (function(module, exports) {
 
 module.exports = {
 	"name": "@meisterplayer/plugin-nativehls",
-	"version": "5.5.1",
+	"version": "5.6.0",
 	"description": "Meister plugin for playback of HLS in browsers that support it natively (ex. Safari)",
 	"main": "dist/NativeHls.js",
 	"keywords": [
@@ -1277,15 +959,24 @@ module.exports = {
 		"type": "git",
 		"url": "https://github.com/meisterplayer/media-nativehls.git"
 	},
+	"scripts": {
+		"lint": "eslint ./src/js",
+		"test": "jest",
+		"test:coverage": "jest --coverage",
+		"build": "gulp build",
+		"dist": "gulp build:min && gulp build:dist"
+	},
 	"author": "Triple",
 	"license": "Apache-2.0",
 	"dependencies": {},
 	"devDependencies": {
-		"meister-gulp-webpack-tasks": "^1.0.6",
-		"meister-js-dev": "^3.1.0",
-		"babel-preset-es2015": "^6.24.0",
-		"babel-preset-es2017": "^6.22.0",
-		"gulp": "^3.9.1"
+		"@meisterplayer/meister-mock": "1.0.0",
+		"babel-preset-es2015": "6.24.0",
+		"babel-preset-es2017": "6.22.0",
+		"gulp": "3.9.1",
+		"jest": "20.0.4",
+		"meister-gulp-webpack-tasks": "1.0.6",
+		"meister-js-dev": "3.1.0"
 	},
 	"peerDependencies": {
 		"@meisterplayer/meisterplayer": ">= 5.1.0"
@@ -1293,7 +984,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 6 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__(0);
