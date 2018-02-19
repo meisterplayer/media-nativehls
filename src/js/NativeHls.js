@@ -1,6 +1,6 @@
 import M3u8Parser from './utils/M3u8Parser';
 import packageJson from '../../package.json';
-
+import isAdItem from './utils/isAdItem';
 import Id3Tag from './models/Id3Tag';
 
 const POLL_INTERVAL = 1000;
@@ -140,7 +140,18 @@ class NativeHls extends Meister.MediaPlugin {
         this.item = item;
 
         this.mediaElement = this.player.mediaElement;
-        this.mediaElement.src = item.src;
+
+        // The current playlist item
+        const currentPlaylistItem = this.meister.playlist.list[this.meister.playlist.index];
+
+        if (isAdItem(currentPlaylistItem) && (this.meister.browser.isMobile || this.meister.browser.isNonAutoPlay)) {
+            this.one('GoogleIma:initialUserActionCompleted', () => {
+                this.mediaElement.src = item.src;
+            });
+        } else {
+            this.mediaElement.src = item.src;
+        }
+
         this.masterPlaylist = item.src;
 
         // Listen to control events.
