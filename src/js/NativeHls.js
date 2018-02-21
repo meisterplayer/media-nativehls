@@ -141,10 +141,13 @@ class NativeHls extends Meister.MediaPlugin {
 
         this.mediaElement = this.player.mediaElement;
 
-        // The current playlist item
+        // // The current playlist item
         const currentPlaylistItem = this.meister.playlist.list[this.meister.playlist.index];
-
-        if (isAdItem(currentPlaylistItem) && (this.meister.browser.isMobile || this.meister.browser.isNonAutoPlay)) {
+        // PLEASE NOTE:
+        // This is NOT the same as is done in DASH or HLS.
+        // If the event is handled on Safari MAC (with livestreams and ADS) it won't start playback after the preroll
+        // However; safari on iOS won't start if the event isn't handled, so.. nice going Apple :(
+        if (isAdItem(currentPlaylistItem) && (this.meister.browser.isMobile && this.meister.browser.isSafari)) {
             this.one('GoogleIma:initialUserActionCompleted', () => {
                 this.mediaElement.src = item.src;
             });
