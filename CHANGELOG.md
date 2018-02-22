@@ -1,3 +1,14 @@
+<a name="5.6.1"></a>
+## [5.6.1](https://github.com/meisterplayer/media-nativehls/compare/v5.6.0...v5.6.1) (2018-02-22)
+
+
+### Bug Fixes
+
+* **autoplay:** Start playback correctly when an ad ends ([7b77bfa](https://github.com/meisterplayer/media-nativehls/commit/7b77bfa))
+* **hls-ads-drm:** fix for Safari Mac and Safari iOS not playing live hls stream after preroll ([c33fa05](https://github.com/meisterplayer/media-nativehls/commit/c33fa05))
+
+
+
 <a name="5.6.0"></a>
 # [5.6.0](https://github.com/meisterplayer/media-nativehls/compare/v5.5.1...v5.6.0) (2018-02-05)
 

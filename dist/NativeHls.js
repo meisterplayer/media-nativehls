@@ -64,7 +64,7 @@ module.exports =
 /******/ 	__webpack_require__.p = "/";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 5);
+/******/ 	return __webpack_require__(__webpack_require__.s = 6);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -107,9 +107,13 @@ var _M3u8Parser = __webpack_require__(3);
 
 var _M3u8Parser2 = _interopRequireDefault(_M3u8Parser);
 
-var _package = __webpack_require__(4);
+var _package = __webpack_require__(5);
 
 var _package2 = _interopRequireDefault(_package);
+
+var _isAdItem = __webpack_require__(4);
+
+var _isAdItem2 = _interopRequireDefault(_isAdItem);
 
 var _Id3Tag = __webpack_require__(2);
 
@@ -261,10 +265,10 @@ var NativeHls = function (_Meister$MediaPlugin) {
     }, {
         key: 'load',
         value: function () {
-            var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(item) {
+            var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(item) {
                 var _this4 = this;
 
-                var manifest, drmServerUrl, lastMediaSequence, hasDVR;
+                var currentPlaylistItem, manifest, drmServerUrl, lastMediaSequence, hasDVR;
                 return regeneratorRuntime.wrap(function _callee$(_context) {
                     while (1) {
                         switch (_context.prev = _context.next) {
@@ -273,7 +277,22 @@ var NativeHls = function (_Meister$MediaPlugin) {
                                 this.item = item;
 
                                 this.mediaElement = this.player.mediaElement;
-                                this.mediaElement.src = item.src;
+
+                                // // The current playlist item
+                                currentPlaylistItem = this.meister.playlist.list[this.meister.playlist.index];
+                                // PLEASE NOTE:
+                                // This is NOT the same as is done in DASH or HLS.
+                                // If the event is handled on Safari MAC (with livestreams and ADS) it won't start playback after the preroll
+                                // However; safari on iOS won't start if the event isn't handled, so.. nice going Apple :(
+
+                                if ((0, _isAdItem2.default)(currentPlaylistItem) && this.meister.browser.isMobile && this.meister.browser.isSafari) {
+                                    this.one('GoogleIma:initialUserActionCompleted', function () {
+                                        _this4.mediaElement.src = item.src;
+                                    });
+                                } else {
+                                    this.mediaElement.src = item.src;
+                                }
+
                                 this.masterPlaylist = item.src;
 
                                 // Listen to control events.
@@ -288,10 +307,10 @@ var NativeHls = function (_Meister$MediaPlugin) {
 
                                 // Trigger this to make it look pretty.
                                 // Loading the first playlist.
-                                _context.next = 11;
+                                _context.next = 12;
                                 return this.loadManifest(item.src);
 
-                            case 11:
+                            case 12:
                                 manifest = _context.sent;
 
 
@@ -355,7 +374,7 @@ var NativeHls = function (_Meister$MediaPlugin) {
                                     _this4.getNewManifest();
                                 }, 5000); // Amount of seconds should be dynamic (By using the manifest)
 
-                            case 25:
+                            case 26:
                             case 'end':
                                 return _context.stop();
                         }
@@ -536,7 +555,7 @@ var NativeHls = function (_Meister$MediaPlugin) {
     }, {
         key: 'getNewManifest',
         value: function () {
-            var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2() {
+            var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
                 var _this8 = this;
 
                 var manifest, lastMediaSequence, amountOfNewSegments, i, hasDVR;
@@ -613,7 +632,7 @@ var NativeHls = function (_Meister$MediaPlugin) {
     }, {
         key: 'loadManifest',
         value: function () {
-            var _ref3 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(src) {
+            var _ref3 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3(src) {
                 var response, text, m3u8, manifest;
                 return regeneratorRuntime.wrap(function _callee3$(_context3) {
                     while (1) {
@@ -942,49 +961,42 @@ exports.default = M3u8Parser;
 
 /***/ }),
 /* 4 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
-module.exports = {
-	"name": "@meisterplayer/plugin-nativehls",
-	"version": "5.6.0",
-	"description": "Meister plugin for playback of HLS in browsers that support it natively (ex. Safari)",
-	"main": "dist/NativeHls.js",
-	"keywords": [
-		"meister",
-		"video",
-		"plugin",
-		"hls"
-	],
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/meisterplayer/media-nativehls.git"
-	},
-	"scripts": {
-		"lint": "eslint ./src/js",
-		"test": "jest",
-		"test:coverage": "jest --coverage",
-		"build": "gulp build",
-		"dist": "gulp build:min && gulp build:dist"
-	},
-	"author": "Triple",
-	"license": "Apache-2.0",
-	"dependencies": {},
-	"devDependencies": {
-		"@meisterplayer/meister-mock": "1.0.0",
-		"babel-preset-es2015": "6.24.0",
-		"babel-preset-es2017": "6.22.0",
-		"gulp": "3.9.1",
-		"jest": "20.0.4",
-		"meister-gulp-webpack-tasks": "1.0.6",
-		"meister-js-dev": "3.1.0"
-	},
-	"peerDependencies": {
-		"@meisterplayer/meisterplayer": ">= 5.1.0"
-	}
-};
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = isAdItem;
+/**
+ * Checks whether the item is an ad item or not.
+ *
+ * @export
+ * @param {Object} item
+ * @returns {boolean}
+ */
+function isAdItem(item) {
+    // Non media items are certenly not ad items.
+    if (item.type !== 'media' || !item.parallel) {
+        return false;
+    }
+
+    // Search for a vast item.
+    return !!item.parallel.find(function (parallelItem) {
+        return parallelItem.type === 'vmap';
+    });
+}
 
 /***/ }),
 /* 5 */
+/***/ (function(module, exports) {
+
+module.exports = {"name":"@meisterplayer/plugin-nativehls","version":"5.6.1","description":"Meister plugin for playback of HLS in browsers that support it natively (ex. Safari)","main":"dist/NativeHls.js","keywords":["meister","video","plugin","hls"],"repository":{"type":"git","url":"https://github.com/meisterplayer/media-nativehls.git"},"scripts":{"lint":"eslint ./src/js","test":"jest","test:coverage":"jest --coverage","build":"gulp build","dist":"gulp build:min && gulp build:dist"},"author":"Triple","license":"Apache-2.0","dependencies":{},"devDependencies":{"@meisterplayer/meister-mock":"1.0.0","babel-preset-es2015":"6.24.0","babel-preset-es2017":"6.22.0","gulp":"3.9.1","jest":"20.0.4","meister-gulp-webpack-tasks":"1.0.6","meister-js-dev":"3.1.0"},"peerDependencies":{"@meisterplayer/meisterplayer":">= 5.1.0"}}
+
+/***/ }),
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__(0);
