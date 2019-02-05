@@ -120,8 +120,10 @@ class NativeHls extends Meister.MediaPlugin {
         this.item = null;
     }
 
-    process(item) {
-        return this.next(item).then((newItem) => {
+    async process(item) {
+        try {
+            const newItem = await this.next(item);
+
             this.player = this.meister.getPlayerByType('html5', newItem);
             if (this.meister.config.audioOnly || newItem.mediaType === 'audio') {
                 this.audioMode = true;
@@ -130,14 +132,17 @@ class NativeHls extends Meister.MediaPlugin {
             }
 
             return newItem;
-        }).catch((err) => {
+        } catch (err) {
             console.error(`Something went wrong while processing middlewares. ${err}`);
-        });
+            return null;
+        }
     }
 
     async load(item) {
         super.load(item);
         this.item = item;
+
+        const manifest = await this.loadManifest(item.src);
 
         this.mediaElement = this.player.mediaElement;
 
@@ -167,7 +172,6 @@ class NativeHls extends Meister.MediaPlugin {
 
         // Trigger this to make it look pretty.
         // Loading the first playlist.
-        const manifest = await this.loadManifest(item.src);
 
         if (manifest.keyInfo) {
             if (manifest.keyInfo.URI) {
@@ -329,6 +333,7 @@ class NativeHls extends Meister.MediaPlugin {
         }
 
         this.meister.playerPlugin.mediaElement.src = '';
+
         if (e.bitrateIndex === -1) {
             this.meister.playerPlugin.mediaElement.src = this.masterPlaylist;
         } else {
@@ -465,6 +470,19 @@ class NativeHls extends Meister.MediaPlugin {
         this.meister.trigger('itemBitrates', {
             bitrates,
             currentIndex: -1,
+        });
+
+        // Since Conviva requires a bitrate before playing (and we do not know the bitrate)
+        // we temporarily set the first bitrate in the manifest. This follows most HLS implementations.
+        const firstBitrate = bitrates.find(bitrate => bitrate.index === 0);
+
+        if (!firstBitrate) {
+            return;
+        }
+
+        this.meister.trigger('playerAutoSwitchBitrate', {
+            newBitrate: firstBitrate.bitrate,
+            newBitrateIndex: firstBitrate.index,
         });
     }
 
