@@ -1,3 +1,17 @@
+# Change Log
+
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+<a name="5.6.2"></a>
+## [5.6.2](https://github.com/meisterplayer/media-nativehls/compare/v5.6.1...v5.6.2) (2019-02-06)
+
+
+### Bug Fixes
+
+* **bitrates:** Fix issue with bitrate availability ([1206879](https://github.com/meisterplayer/media-nativehls/commit/1206879))
+
+
+
 <a name="5.6.1"></a>
 ## [5.6.1](https://github.com/meisterplayer/media-nativehls/compare/v5.6.0...v5.6.1) (2018-02-22)
 
@@ -87,6 +101,3 @@
 
 * **dvrThreshold:** Fix issue where a 0 threshold was not set ([bfadf5a](https://github.com/meisterplayer/media-nativehls/commit/bfadf5a))
 * **userAgent:** Fix issue where Facebook inline browser would not play HLS on iOS ([9a88d0b](https://github.com/meisterplayer/media-nativehls/commit/9a88d0b))
-
-
-
