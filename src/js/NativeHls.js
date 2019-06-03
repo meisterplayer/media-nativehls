@@ -319,7 +319,7 @@ class NativeHls extends Meister.MediaPlugin {
                 this.onRequestGoLive();
             });
         } else {
-            this.player.currentTime = this.endTime - 30;
+            this.player.currentTime = this.endTime - 1;
         }
     }
 
