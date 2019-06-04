@@ -1,6 +1,15 @@
-# Change Log
+# Changelog
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+### [5.6.3](https://github.com/meisterplayer/media-nativehls/compare/v5.6.2...v5.6.3) (2019-06-04)
+
+
+### Bug Fixes
+
+* **live:** Remove arbitrary 30 second buffer when seeking to live ([013abea](https://github.com/meisterplayer/media-nativehls/commit/013abea))
+
+
 
 <a name="5.6.2"></a>
 ## [5.6.2](https://github.com/meisterplayer/media-nativehls/compare/v5.6.1...v5.6.2) (2019-02-06)
