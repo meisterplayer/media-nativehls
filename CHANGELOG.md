@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [5.6.4](https://github.com/meisterplayer/media-nativehls/compare/v5.6.3...v5.6.4) (2019-06-24)
+
+
+### Bug Fixes
+
+* **seek:** Fix seeking to the start of a DVR window on load ([25245c0](https://github.com/meisterplayer/media-nativehls/commit/25245c0))
+
+
+
 ### [5.6.3](https://github.com/meisterplayer/media-nativehls/compare/v5.6.2...v5.6.3) (2019-06-04)
 
 
