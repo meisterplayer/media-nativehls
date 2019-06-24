@@ -216,7 +216,7 @@ class NativeHls extends Meister.MediaPlugin {
             if (manifest.isLive) this.onRequestGoLive();
         } else if (typeof item.startFromBeginning === 'object') {
             this.onRequestSeek({
-                relativePosition: item.startFromBeginning.offset / this.duration,
+                relativePosition: item.startFromBeginning.offset / this.mediaDuration,
             });
         } else if (isNaN(this.meister.duration)) {
             this.meister.one('playerCanPlay', () => {
@@ -289,7 +289,13 @@ class NativeHls extends Meister.MediaPlugin {
         if (!e.forcedStart && this.blockSeekForward && targetTime > this.player.currentTime) { return; }
 
         if (Number.isFinite(targetTime)) {
-            this.player.currentTime = targetTime;
+            if (isNaN(this.player.duration)) {
+                this.one('playerCanPlay', () => {
+                    this.player.currentTime = targetTime;
+                });
+            } else {
+                this.player.currentTime = targetTime;
+            }
         }
     }
 
